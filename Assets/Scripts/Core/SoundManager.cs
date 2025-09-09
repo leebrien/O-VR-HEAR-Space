@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using Oculus.Interaction;
+using TMPro;
 
 public class SoundManager : MonoBehaviour
 {
@@ -68,8 +69,9 @@ public class SoundManager : MonoBehaviour
         if (_audioSource != null)
         {
             _audioSource.Stop();
+            _audioSource.enabled = false;
         }
-        audioObject.SetActive(false);
+        //audioObject.SetActive(false);
     }
 
     private void InitializeSoundSource(AudioClip clip)
@@ -126,4 +128,17 @@ public class SoundManager : MonoBehaviour
         soundPos.x = Mathf.Clamp(soundPos.x, -_roomSize.x / 2, _roomSize.x / 2);
         soundPos.z = Mathf.Clamp(soundPos.z, -_roomSize.z / 2, _roomSize.z / 2);
     }
+
+    public void SetMeshMaterial(Material newMaterial)
+    {
+        if (audioObject != null)
+        {
+            Renderer renderer = audioObject.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.material = newMaterial;
+            }
+        }
+    }
+
 }

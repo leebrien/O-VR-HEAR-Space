@@ -12,6 +12,17 @@ public class TaskPanel : MonoBehaviour
 
     private const float timerDuration = 5f;
 
+    private void Awake()
+    {
+        string currentCondition = CoreManager.Instance.currentCondition;
+        int currentTask = CoreManager.Instance.currentTask;
+
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Task"))
+        {
+            displayText.text = $"Task {currentTask} ({currentCondition})";
+        }
+    }
+
     public void OnStartButtonClicked()
     {
         if (startButton != null)
@@ -42,6 +53,15 @@ public class TaskPanel : MonoBehaviour
         if (displayText != null)
         {
             displayText.gameObject.SetActive(true);
+
+            RectTransform textTransform = displayText.GetComponent<RectTransform>();
+            if (textTransform != null)
+            {
+                Vector2 newPos = textTransform.anchoredPosition;
+                newPos.y -= 10;
+                textTransform.anchoredPosition = newPos;
+            }
+            displayText.fontSize = 30;
         }
 
         while (currentTime > 0)

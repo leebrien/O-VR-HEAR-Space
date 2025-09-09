@@ -4,21 +4,18 @@ using TMPro;
 public class TaskInteraction : MonoBehaviour
 {
     public Material successMaterial;
-    public GameObject[] environmentObjects;
+    //public GameObject[] environmentObjects;
     public TaskPanel taskPanel;
 
     public GameObject proceedButton;
     public TextMeshProUGUI displayText;
 
-    //public Material skyboxMaterial;
-
     public void OnSuccess()
     {
         Debug.Log("HIT HIT HIT!");
 
-        
         // Change the environment color
-        foreach (GameObject envObject in environmentObjects)
+        /*foreach (GameObject envObject in environmentObjects)
         {
             Renderer renderer = envObject.GetComponent<Renderer>();
             if (renderer != null)
@@ -26,56 +23,42 @@ public class TaskInteraction : MonoBehaviour
                 renderer.material = successMaterial;
             }
         }
-
-        /*
-        // Change the skybox
-        if (skyboxMaterial != null)
-        {
-            RenderSettings.skybox = skyboxMaterial;
-        }
         */
 
         // Stop sound
-        if (taskPanel != null && taskPanel.soundManager != null)
+        if (taskPanel != null && taskPanel.soundManager != null && !taskPanel.panelToHide.activeSelf)
         {
             taskPanel.soundManager.StopSound();
         }
 
         // Show the panel again
-        if (taskPanel != null)
+        if (taskPanel != null && !taskPanel.panelToHide.activeSelf)
         {
             taskPanel.ShowPanel();
-        }
 
-        if (proceedButton != null)
-        {
-            proceedButton.SetActive(true);
-            // Decrease the button's Y position by 20
-            RectTransform buttonTransform = proceedButton.GetComponent<RectTransform>();
-            if (buttonTransform != null)
+            if (proceedButton != null)
             {
-                Vector2 newPos = buttonTransform.anchoredPosition;
-                newPos.y -= 20;
-                buttonTransform.anchoredPosition = newPos;
-            }
-        }
-
-        if (displayText != null)
-        {
-            displayText.gameObject.SetActive(true);
-            displayText.text = "Task Completed";
-
-            // Increase the display text's Y position by 20
-            RectTransform textTransform = displayText.GetComponent<RectTransform>();
-            if (textTransform != null)
-            {
-                Vector2 newPos = textTransform.anchoredPosition;
-                newPos.y += 20;
-                textTransform.anchoredPosition = newPos;
+                proceedButton.SetActive(true);
             }
 
-            // Set the display text's font size to 20
-            displayText.fontSize = 10;
+            if (displayText != null)
+            {
+                displayText.gameObject.SetActive(true);
+
+                string currentCondition = CoreManager.Instance.currentCondition;
+                int currentTask = CoreManager.Instance.currentTask;
+                displayText.text = $"Task {currentTask} ({currentCondition}) Completed";
+
+                RectTransform textTransform = displayText.GetComponent<RectTransform>();
+                if (textTransform != null)
+                {
+                    Vector2 newPos = textTransform.anchoredPosition;
+                    newPos.y += 10;
+                    textTransform.anchoredPosition = newPos;
+                }
+                displayText.fontSize = 10;
+            }
+
         }
     }
 }

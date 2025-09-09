@@ -12,7 +12,7 @@ public class CoreManager : MonoBehaviour
     public int currentTask;
 
     // Keeps track of progress in scene order
-    private int _currentIndex = 0;
+    public int _currentIndex = 0;
 
     // The full sequence of scenes to run
     private string[] _sceneOrder;
