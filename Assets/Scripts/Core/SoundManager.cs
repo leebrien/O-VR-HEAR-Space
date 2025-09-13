@@ -5,6 +5,7 @@ using TMPro;
 
 public class SoundManager : MonoBehaviour
 {
+    public static SoundManager Instance;
     public Transform user; //User reference, eye anchor center
     public GameObject audioObject; // Direct reference to the object in the hierarchy
     public AudioClip genericCue;
@@ -17,9 +18,18 @@ public class SoundManager : MonoBehaviour
     private void Awake()
     {
         Random.InitState(System.DateTime.Now.Millisecond);
-
-        // Get the AudioSource component from the existing object
-        _audioSource = audioObject.GetComponent<AudioSource>();
+        
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+            _audioSource = audioObject.GetComponent<AudioSource>();
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        
         if (_audioSource == null)
         {
             Debug.LogError("The assigned audioObject does not have an AudioSource!");

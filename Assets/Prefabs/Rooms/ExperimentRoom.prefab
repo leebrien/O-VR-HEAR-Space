@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 599445405664224876}
   - component: {fileID: 5832103481428197218}
   - component: {fileID: 7660429463147832161}
+  - component: {fileID: 5677337669710215793}
   m_Layer: 0
   m_Name: Wall Behind
   m_TagString: Untagged
@@ -108,6 +109,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5677337669710215793
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 202428411230928802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7a576fd1f6974af4b53439ff349b50b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowColor: {r: 1, g: 0, b: 0, a: 1}
+  detectionRadius: 1
+  glowIntensity: 1.5
 --- !u!1 &759048766912119857
 GameObject:
   m_ObjectHideFlags: 0
@@ -120,6 +136,7 @@ GameObject:
   - component: {fileID: 30889175023763194}
   - component: {fileID: 2079112191139552057}
   - component: {fileID: 6657131136079512039}
+  - component: {fileID: 4158193658459311125}
   m_Layer: 0
   m_Name: Wall Right
   m_TagString: Untagged
@@ -216,6 +233,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &4158193658459311125
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 759048766912119857}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7a576fd1f6974af4b53439ff349b50b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowColor: {r: 1, g: 0, b: 0, a: 1}
+  detectionRadius: 1
+  glowIntensity: 1.5
 --- !u!1 &2043108530779629900
 GameObject:
   m_ObjectHideFlags: 0
@@ -228,6 +260,7 @@ GameObject:
   - component: {fileID: 8189753220510180504}
   - component: {fileID: 5927161157625600453}
   - component: {fileID: 1289627793903726885}
+  - component: {fileID: 7698137576289747208}
   m_Layer: 0
   m_Name: Wall Left
   m_TagString: Untagged
@@ -324,6 +357,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7698137576289747208
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2043108530779629900}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7a576fd1f6974af4b53439ff349b50b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowColor: {r: 1, g: 0, b: 0, a: 1}
+  detectionRadius: 1
+  glowIntensity: 1.5
 --- !u!1 &2444911968834405129
 GameObject:
   m_ObjectHideFlags: 0
@@ -372,6 +420,7 @@ GameObject:
   - component: {fileID: 1490408486557273905}
   - component: {fileID: 4343938087706281659}
   - component: {fileID: 1710387793677336995}
+  - component: {fileID: 5539858690136147434}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -468,6 +517,21 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &5539858690136147434
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4497185830597024736}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7a576fd1f6974af4b53439ff349b50b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowColor: {r: 1, g: 0, b: 0, a: 1}
+  detectionRadius: 1
+  glowIntensity: 1.5
 --- !u!1 &4558826026625249083
 GameObject:
   m_ObjectHideFlags: 0
@@ -480,6 +544,7 @@ GameObject:
   - component: {fileID: 7879364508443340449}
   - component: {fileID: 73547371798741239}
   - component: {fileID: 5675968086572734841}
+  - component: {fileID: 7722434904399098260}
   m_Layer: 0
   m_Name: Wall Infront
   m_TagString: Untagged
@@ -576,3 +641,18 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &7722434904399098260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4558826026625249083}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b7a576fd1f6974af4b53439ff349b50b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  glowColor: {r: 1, g: 0, b: 0, a: 1}
+  detectionRadius: 1
+  glowIntensity: 1.5
