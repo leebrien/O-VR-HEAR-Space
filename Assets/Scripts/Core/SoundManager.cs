@@ -110,7 +110,12 @@ public class SoundManager : MonoBehaviour
         else if (taskType == 2 || taskType == 3)
         {
             int direction = Random.Range(0, 8);
-            float offset = Random.Range(1.75f, 3.75f);
+
+            // Arms reach
+            float offset = Random.Range(0.75f, 1.5f);
+
+            // Far range
+            //float offset = Random.Range(1.75f, 3.75f);
 
             switch (direction)
             {
