@@ -6,7 +6,7 @@ public class TaskInteraction : MonoBehaviour
     public Material successMaterial;
     //public GameObject[] environmentObjects;
     public TaskPanel taskPanel;
-
+    public AudioSource ambientNoise;
     public GameObject proceedButton;
     public TextMeshProUGUI displayText;
 
@@ -29,6 +29,7 @@ public class TaskInteraction : MonoBehaviour
         if (taskPanel != null && taskPanel.soundManager != null && !taskPanel.panelToHide.activeSelf)
         {
             taskPanel.soundManager.StopSound();
+            ambientNoise.Stop();
         }
 
         // Show the panel again

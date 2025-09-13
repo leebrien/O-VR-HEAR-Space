@@ -9,6 +9,7 @@ public class TaskPanel : MonoBehaviour
     public TextMeshProUGUI displayText;
     public GameObject panelToHide;
     public SoundManager soundManager;
+    public AudioSource ambientNoise;
 
     private const float timerDuration = 5f;
 
@@ -74,10 +75,16 @@ public class TaskPanel : MonoBehaviour
         displayText.text = "0";
         yield return new WaitForSeconds(1f);
 
+        if (ambientNoise != null)
+        {
+            ambientNoise.Play();
+        }
+
         if (displayText != null)
         {
             displayText.gameObject.SetActive(false);
         }
+
         if (panelToHide != null)
         {
             panelToHide.SetActive(false);
@@ -87,5 +94,6 @@ public class TaskPanel : MonoBehaviour
                 soundManager.PlaySound();
             }
         }
+
     }
 }
