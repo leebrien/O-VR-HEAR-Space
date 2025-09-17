@@ -29,7 +29,12 @@ public class TaskInteraction : MonoBehaviour
         if (taskPanel != null && taskPanel.soundManager != null && !taskPanel.panelToHide.activeSelf)
         {
             taskPanel.soundManager.StopSound();
-            ambientNoise.Stop();
+
+            if (ambientNoise != null)
+            {
+                ambientNoise.Stop();
+            }
+            
         }
 
         // Show the panel again

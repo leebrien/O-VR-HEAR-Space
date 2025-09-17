@@ -14,6 +14,8 @@ public class SoundManager : MonoBehaviour
     private AudioSource _audioSource;
     private Vector3 _soundPosition;
 
+    private Vector3 _initialPosition;
+
     private void Awake()
     {
         Random.InitState(System.DateTime.Now.Millisecond);
@@ -23,6 +25,11 @@ public class SoundManager : MonoBehaviour
         if (_audioSource == null)
         {
             Debug.LogError("The assigned audioObject does not have an AudioSource!");
+        }
+
+        if (audioObject != null)
+        {
+            _initialPosition = audioObject.transform.position;
         }
     }
 
@@ -72,6 +79,14 @@ public class SoundManager : MonoBehaviour
             _audioSource.enabled = false;
         }
         //audioObject.SetActive(false);
+    }
+    public void RevertPosition()
+    {
+        if (audioObject != null)
+        {
+            Rigidbody rb = audioObject.GetComponent<Rigidbody>();
+            rb.MovePosition(_initialPosition);
+        }
     }
 
     private void InitializeSoundSource(AudioClip clip)
