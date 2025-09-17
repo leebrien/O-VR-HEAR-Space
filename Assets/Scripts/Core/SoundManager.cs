@@ -1,7 +1,10 @@
+using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Oculus.Interaction;
 using TMPro;
+using Random = UnityEngine.Random;
 
 public class SoundManager : MonoBehaviour
 {
@@ -17,23 +20,34 @@ public class SoundManager : MonoBehaviour
 
     private void Awake()
     {
-        Random.InitState(System.DateTime.Now.Millisecond);
         
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            _audioSource = audioObject.GetComponent<AudioSource>();
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        user = GameObject.FindGameObjectWithTag("MainCamera")?.transform;
+        audioObject = GameObject.FindGameObjectWithTag("CueSource");
+        
+        if (audioObject != null) 
+            _audioSource = audioObject.GetComponent<AudioSource>();
         
         if (_audioSource == null)
-        {
-            Debug.LogError("The assigned audioObject does not have an AudioSource!");
-        }
+            Debug.LogWarning("No AudioSource found in scene: " + scene.name);
     }
 
     public void PlaySound()

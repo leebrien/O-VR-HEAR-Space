@@ -4,7 +4,7 @@ using System.Collections;
 
 public class SoundPolling : MonoBehaviour
 {
-    public string backendURL = "http://Rams-MacBook-Pro.local:8000/api/v1/export/audio.wav";
+    public string backendURL = "http://Rams-MacBook-Pro.local:8000/api/v1/export/audio.mp3";
 
     public void FetchAudioOnce()
     {
@@ -13,7 +13,8 @@ public class SoundPolling : MonoBehaviour
 
     private IEnumerator PollAudio()
 {
-    using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(backendURL, AudioType.WAV))
+    using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(backendURL, AudioType.MPEG))
+
     {
         yield return www.SendWebRequest();
 
@@ -29,7 +30,7 @@ public class SoundPolling : MonoBehaviour
 
             Debug.Log("Audio fetched!");
 
-            if (SoundManager.Instance != null)
+            if (SoundManager.Instance)
             {
                 SoundManager.Instance.hearsonaCue = hearsonaClip;
                 Debug.Log("Exported hearsona cue stored in SoundManager");

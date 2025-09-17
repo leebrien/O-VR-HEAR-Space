@@ -18,6 +18,26 @@ TagManager:
   - QDSUIToggleButton
   - QDSUITextSecondaryColor
   - SamplesInfoPanel
+  - CueSource
+  - QTQuestionnaireManager
+  - QTQuestionPage
+  - QTSelectionHighlight
+  - QTSlider
+  - QTMultipleChoice
+  - QTOptionOther
+  - QTButton
+  - QTCheckboxes
+  - QTCheckboxesGrid
+  - QTGridOption
+  - QTDropdown
+  - QTGridRowHeader
+  - QTImage
+  - QTLinearScale
+  - QTMultipleChoiceGrid
+  - QTManager
+  - QTText
+  - QTTextInput
+  - QTVideo
   layers:
   - Default
   - TransparentFX
