@@ -82,9 +82,11 @@ public class SoundManager : MonoBehaviour
     }
     public void RevertPosition()
     {
+        Rigidbody rb = audioObject.GetComponent<Rigidbody>();
+
         if (audioObject != null)
         {
-            Rigidbody rb = audioObject.GetComponent<Rigidbody>();
+            
             rb.MovePosition(_initialPosition);
         }
     }
