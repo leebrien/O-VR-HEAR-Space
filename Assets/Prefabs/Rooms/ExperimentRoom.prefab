@@ -381,6 +381,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8122287411394092262}
+  - component: {fileID: 2522245435681083221}
   m_Layer: 0
   m_Name: ExperimentRoom
   m_TagString: Untagged
@@ -408,6 +409,31 @@ Transform:
   - {fileID: 401421528897625848}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2522245435681083221
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2444911968834405129}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d03d79507cf39ef46800a3219300acec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  playerTransform: {fileID: 0}
+  wallRenderers:
+  - {fileID: 5832103481428197218}
+  - {fileID: 73547371798741239}
+  - {fileID: 5927161157625600453}
+  - {fileID: 2079112191139552057}
+  wallColliders:
+  - {fileID: 7660429463147832161}
+  - {fileID: 5675968086572734841}
+  - {fileID: 1289627793903726885}
+  - {fileID: 6657131136079512039}
+  fadeColor: {r: 1, g: 0, b: 0, a: 1}
+  fadeDistance: 1
 --- !u!1 &4497185830597024736
 GameObject:
   m_ObjectHideFlags: 0

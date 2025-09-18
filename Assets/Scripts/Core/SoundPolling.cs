@@ -4,7 +4,7 @@ using System.Collections;
 
 public class SoundPolling : MonoBehaviour
 {
-    public string backendURL = "http://Rams-MacBook-Pro.local:8000/api/v1/export/audio.mp3";
+    public string backendURL = "http://172.20.10.50:8000/api/v1/export/audio.mp3";
 
     public void FetchAudioOnce()
     {
