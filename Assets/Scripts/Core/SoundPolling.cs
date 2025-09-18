@@ -4,7 +4,7 @@ using System.Collections;
 
 public class SoundPolling : MonoBehaviour
 {
-    public string backendURL = "http://172.20.10.50:8000/api/v1/export/audio.mp3";
+    public string backendURL;
 
     public void FetchAudioOnce()
     {
@@ -13,7 +13,7 @@ public class SoundPolling : MonoBehaviour
 
     private IEnumerator PollAudio()
 {
-    using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(backendURL, AudioType.MPEG))
+    using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(backendURL, AudioType.WAV))
 
     {
         yield return www.SendWebRequest();
