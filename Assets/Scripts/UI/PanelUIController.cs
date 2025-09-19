@@ -18,7 +18,8 @@ public class PanelUIController : MonoBehaviour
     private void Start()
     {
         proceedButton = LobbyMenuDesign.transform.Find("rowButtonLayout/proceedButton").GetComponent<Button>();
-        proceedButton.interactable = false;
+        // proceedButton.interactable = false;
+        proceedButton.interactable = true;
     }
 
     public void onPlayTutorialButtonClick()

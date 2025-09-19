@@ -16,7 +16,7 @@ public class SoundManager : MonoBehaviour
     private readonly Vector3 _roomSize = new Vector3(8.0f, 2.5f, 8.0f);
 
     private AudioSource _audioSource;
-    private Vector3 _soundPosition;
+    public Vector3 _soundPosition;
 
     private void Awake()
     {
@@ -151,18 +151,6 @@ public class SoundManager : MonoBehaviour
         soundPos.y = Random.Range(1, user.position.y + 0.3f);
         soundPos.x = Mathf.Clamp(soundPos.x, -_roomSize.x / 2, _roomSize.x / 2);
         soundPos.z = Mathf.Clamp(soundPos.z, -_roomSize.z / 2, _roomSize.z / 2);
-    }
-
-    public void SetMeshMaterial(Material newMaterial)
-    {
-        if (audioObject != null)
-        {
-            Renderer renderer = audioObject.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                renderer.material = newMaterial;
-            }
-        }
     }
 
 }

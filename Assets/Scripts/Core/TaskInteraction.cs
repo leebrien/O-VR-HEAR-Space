@@ -4,27 +4,19 @@ using TMPro;
 public class TaskInteraction : MonoBehaviour
 {
     public Material successMaterial;
-    //public GameObject[] environmentObjects;
     public TaskPanel taskPanel;
-
+    public GameObject[] environmentObjects;
+    public GameObject audioObject;
     public GameObject proceedButton;
     public TextMeshProUGUI displayText;
     public TextMeshProUGUI interactionStatusText;
+    public Rigidbody audioRB;
+
+    private Vector3 _soundPosition;
 
     public void OnSuccess()
     {
         Debug.Log("HIT HIT HIT!");
-
-        // Change the environment color
-        /*foreach (GameObject envObject in environmentObjects)
-        {
-            Renderer renderer = envObject.GetComponent<Renderer>();
-            if (renderer != null)
-            {
-                renderer.material = successMaterial;
-            }
-        }
-        */
 
         // Stop sound
         if (taskPanel && SoundManager.Instance && !taskPanel.panelToHide.activeSelf)
@@ -71,4 +63,26 @@ public class TaskInteraction : MonoBehaviour
 
         }
     }
+    public void revertAudioPosition()
+    {   
+        if (audioRB != null)
+        {
+            audioRB.MovePosition(SoundManager.Instance._soundPosition);
+            Debug.Log("Moved sound source to: " + _soundPosition);
+        }
+        
+    }
+
+    public void SetMeshMaterial(Material newMaterial)
+    {
+        foreach (GameObject envObject in environmentObjects)
+        {
+            Renderer renderer = envObject.GetComponent<Renderer>();
+            if (renderer != null)
+            {
+                renderer.material = newMaterial;
+            }
+        }
+    }
+
 }
