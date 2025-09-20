@@ -11,6 +11,7 @@ Library: /Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Temp/BurstOutput/temp
 --float-mode=Fast
 --generate-link-xml=Temp/burst.link.xml
 --temp-folder=/Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Temp/Burst
+--debug=Full
 --key-folder=/Applications/Unity/Hub/Editor/6000.0.41f1/PlaybackEngines/AndroidPlayer
 --decode-folder=/Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Library/Burst
 --output=/Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Temp/BurstOutput/tempburstlibs/arm64-v8a/lib_burst_generated
@@ -28,6 +29,7 @@ Library: /Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Temp/BurstOutput/temp
 --target-framework=NetFramework
 --generate-link-xml=Temp/burst.link.xml
 --temp-folder=/Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Temp/Burst
+--debug=Full
 --key-folder=/Applications/Unity/Hub/Editor/6000.0.41f1/PlaybackEngines/AndroidPlayer
 --decode-folder=/Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Library/Burst
 --output=/Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Temp/BurstOutput/tempburstlibs/arm64-v8a/lib_burst_generated
@@ -113,6 +115,7 @@ Library: /Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Temp/BurstOutput/temp
 --target-framework=NetFramework
 --generate-link-xml=Temp/burst.link.xml
 --temp-folder=/Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Temp/Burst
+--debug=Full
 --key-folder=/Applications/Unity/Hub/Editor/6000.0.41f1/PlaybackEngines/AndroidPlayer
 --decode-folder=/Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Library/Burst
 --output=/Users/rmbrodett/DevDrive/ovr-hear-vr-space-proto/Temp/BurstOutput/tempburstlibs/arm64-v8a/lib_burst_generated
