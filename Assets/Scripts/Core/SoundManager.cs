@@ -105,7 +105,7 @@ public class SoundManager : MonoBehaviour
         _audioSource.playOnAwake = false;
         _audioSource.loop = false;
 
-        StartCoroutine(PlayWithDelay(2f));
+        StartCoroutine(PlayWithDelay(1.5f));
     }
 
     private IEnumerator PlayWithDelay(float delay)
@@ -128,13 +128,15 @@ public class SoundManager : MonoBehaviour
     {
         if (taskType == 1)
         {
-            soundPos.z += 3.5f;
+            soundPos.z += 2f;
             soundPos.x += Random.Range(-3.75f, 3.75f);
         }
         else if (taskType == 2 || taskType == 3)
         {
             int direction = Random.Range(0, 8);
-            float offset = Random.Range(1.75f, 3.75f);
+           // float offset = Random.Range(1.75f, 3.75f);
+            float[] allowedoffsets = { 0.75f, 1f, 1.25f };
+            float offset = allowedoffsets[Random.Range(0, allowedoffsets.Length)];
 
             switch (direction)
             {
