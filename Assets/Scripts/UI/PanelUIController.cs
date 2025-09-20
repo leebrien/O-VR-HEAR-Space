@@ -1,8 +1,10 @@
 using System;
 using System.Collections;
-using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class PanelUIController : MonoBehaviour
 {
@@ -24,7 +26,7 @@ public class PanelUIController : MonoBehaviour
 
     public void onPlayTutorialButtonClick()
     {
-        /**/
+        SceneManager.LoadScene("PracticeScene");
     }
 
     public void onCueSelectButtonClick()

@@ -12,20 +12,23 @@ EditorBuildSettings:
     path: Assets/Scenes/LobbyScene.unity
     guid: 653766039f6a34074b36d1b98976c4fb
   - enabled: 1
+    path: Assets/Scenes/PracticeScene.unity
+    guid: fb4d3352b095d9941b46a34dfc157256
+  - enabled: 1
     path: Assets/Scenes/Task1.unity
     guid: 12bd94900c7fc4846a721d9d4f23a767
   - enabled: 1
     path: Assets/Scenes/Questionnaire.unity
     guid: 07c03de72f135ea41aaba816c6ec9054
   - enabled: 1
+    path: Assets/Scenes/Break.unity
+    guid: 4a39ae4382f5f1e40a8af6d9db0deaf8
+  - enabled: 1
     path: Assets/Scenes/Task2.unity
     guid: 8f9f4c98fd4df44b19b4159d7dbc2a91
   - enabled: 1
     path: Assets/Scenes/Task3.unity
     guid: 25a358059c08341a6bcac3444d8d3934
-  - enabled: 1
-    path: Assets/Scenes/Break.unity
-    guid: 4a39ae4382f5f1e40a8af6d9db0deaf8
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 4c25f306777e0442287cc59a48e54838, type: 2}
