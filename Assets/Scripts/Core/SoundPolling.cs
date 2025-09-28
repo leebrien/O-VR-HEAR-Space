@@ -6,17 +6,23 @@ public class SoundPolling : MonoBehaviour
 {
     public string backendURL;
 
-    public void FetchAudioOnce()
-    {
-        StartCoroutine(PollAudio());
-    }
-
-    private IEnumerator PollAudio()
+   public IEnumerator PollAudio(System.Func<bool> isCancelled)
 {
     using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(backendURL, AudioType.WAV))
 
     {
-        yield return www.SendWebRequest();
+        var request = www.SendWebRequest();
+        while (!request.isDone)
+        {
+            if (isCancelled())
+            {
+                www.Abort();
+                yield break;
+            }
+            yield return null;
+        }
+        
+        if (isCancelled()) yield break;
 
         if (www.result != UnityWebRequest.Result.Success)
         {

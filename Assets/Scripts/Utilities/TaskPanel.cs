@@ -9,17 +9,19 @@ public class TaskPanel : MonoBehaviour
     public TextMeshProUGUI displayText;
     public TextMeshProUGUI counterTitleHolder;
     public TextMeshProUGUI counterTextHolder;
-    public GameObject panel_texts_holder;
+    public GameObject panelTextsHolder;
     public TextMeshProUGUI interactionStatusText;
     public GameObject panelToHide;
 
-    private const float _timerDuration = 5f;
+    private const float TimerDuration = 5f;
+    private TrackingSwitcher _trackingSwitcher;
 
     private void Awake()
     {
         string currentCondition = CoreManager.Instance.currentCondition;
         int currentTask = CoreManager.Instance.currentTask;
         if (interactionStatusText) interactionStatusText.gameObject.SetActive(false);
+        if (currentTask == 1) _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
         
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Task"))
         {
@@ -42,14 +44,14 @@ public class TaskPanel : MonoBehaviour
 
             
         }
-        panel_texts_holder.SetActive(true);
+        panelTextsHolder.SetActive(true);
     }
 
     public void OnStartButtonClicked()
     {
         if (startButton != null)
         {
-            panel_texts_holder.SetActive(false);
+            panelTextsHolder.SetActive(false);
             displayText.gameObject.SetActive(false);
             startButton.SetActive(false);
             StartCoroutine(CountdownTimer());
@@ -72,9 +74,10 @@ public class TaskPanel : MonoBehaviour
     }
 
     // Panel countdown
+    // ReSharper disable Unity.PerformanceAnalysis
     private IEnumerator CountdownTimer()
     {
-        float currentTime = _timerDuration;
+        float currentTime = TimerDuration;
 
         if (counterTextHolder)
         {
@@ -90,6 +93,10 @@ public class TaskPanel : MonoBehaviour
         }
 
         counterTextHolder.text = "0";
+        if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher != null)
+        {
+            _trackingSwitcher.SwitchToControllersOnly();
+        }
         yield return new WaitForSeconds(1f);
 
         if (displayText)
