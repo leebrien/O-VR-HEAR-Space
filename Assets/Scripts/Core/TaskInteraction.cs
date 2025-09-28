@@ -10,9 +10,16 @@ public class TaskInteraction : MonoBehaviour
     public GameObject proceedButton;
     public TextMeshProUGUI displayText;
     public TextMeshProUGUI interactionStatusText;
-    public Rigidbody audioRB;
+    public Rigidbody audioRb;
 
     private Vector3 _soundPosition;
+    private TrackingSwitcher _trackingSwitcher;
+    
+    private void Awake()
+    {
+        if (CoreManager.Instance.currentTask == 1)
+            _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+    }
 
     public void OnSuccess()
     {
@@ -25,6 +32,9 @@ public class TaskInteraction : MonoBehaviour
         }
 
         // Show the panel again
+        if (CoreManager.Instance.currentTask == 1)
+            _trackingSwitcher.SwitchToHandsOnly();
+        
         if (taskPanel && !taskPanel.panelToHide.activeSelf)
         {
             taskPanel.ShowPanel();
@@ -62,12 +72,15 @@ public class TaskInteraction : MonoBehaviour
             }
 
         }
+        
+        if (CoreManager.Instance.currentTask == 1)
+            _trackingSwitcher.SwitchToHandsOnly();
     }
     public void revertAudioPosition()
     {   
-        if (audioRB != null)
+        if (audioRb != null)
         {
-            audioRB.MovePosition(SoundManager.Instance._soundPosition);
+            audioRb.MovePosition(SoundManager.Instance._soundPosition);
             Debug.Log("Moved sound source to: " + _soundPosition);
         }
         
