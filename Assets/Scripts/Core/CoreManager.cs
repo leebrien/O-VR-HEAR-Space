@@ -1,13 +1,14 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using System.Collections.Generic;
 
 public class CoreManager : MonoBehaviour
 {
     public static CoreManager Instance;
-    
+
     // Current experiment condition (PC = personalized, GC = generic)
     public string currentCondition;
-    
+
     // Current task number (1,2,3)
     public int currentTask;
 
@@ -16,7 +17,14 @@ public class CoreManager : MonoBehaviour
 
     // The full sequence of scenes to run
     private string[] _sceneOrder;
-    
+
+    // Time logging fields
+    private float _taskStartTime = 0f;
+    //Task identifier
+    private string _runningTaskIdentifier = string.Empty;
+    //Time logger
+    private Dictionary<string, float> _taskDurations;
+
     private void Awake()
     {
         //Singleton pattern
@@ -24,6 +32,7 @@ public class CoreManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject); // survive scene transitions
+            _taskDurations = new Dictionary<string, float>(); // Initialize the dictionary
         }
         else
         {
@@ -47,7 +56,7 @@ public class CoreManager : MonoBehaviour
         SetCondition(condition); // "PC" "GC"
         BuildSceneOrder();
     }
-    
+
     // Build sequence of scenes depending on starting condition
     private void BuildSceneOrder()
     {
@@ -71,6 +80,59 @@ public class CoreManager : MonoBehaviour
         }
     }
 
+    private bool IsTaskScene(string sceneName)
+    {
+        return sceneName.Contains("PC_Task") || sceneName.Contains("GC_Task");
+    }
+
+    public void StartCurrentTaskTime()
+    {
+        string taskIdentifier = $"{currentCondition}_Task{currentTask}";
+
+        _taskStartTime = Time.time;
+        _runningTaskIdentifier = taskIdentifier;
+        Debug.Log($"[CoreManager] Started timing for: {taskIdentifier} at {Time.time:F2}s");
+    }
+
+    public void StopAndLogCurrentTaskTime()
+    {
+        if (!string.IsNullOrEmpty(_runningTaskIdentifier) && _taskStartTime > 0f)
+        {
+            float duration = Time.time - _taskStartTime;
+
+            int completedSceneIndex = _currentIndex - 1;
+
+            string uniqueLogKey = $"{_runningTaskIdentifier}_Run_End_Index_{completedSceneIndex}";
+
+            // Add the duration to the dictionary and log completion
+            try
+            {
+                _taskDurations.Add(uniqueLogKey, duration);
+                Debug.Log($"[CoreManager] TASK COMPLETED AND LOGGED: {uniqueLogKey} = {duration:F2}s");
+            }
+            catch (System.ArgumentException e)
+            {
+                Debug.LogError($"[CoreManager] Failed to log task time: Key already exists. {e.Message}");
+            }
+
+            // Reset timer state
+            _taskStartTime = 0f;
+            _runningTaskIdentifier = string.Empty;
+        }
+    }
+
+    public void PrintAllTaskTimes()
+    {
+        Debug.Log("===========================================");
+        Debug.Log("[CoreManager] --- FINAL TASK TIME LOG ---");
+        Debug.Log($"Total Logged Entries: {_taskDurations.Count}");
+        foreach (var entry in _taskDurations)
+        {
+            Debug.Log($"Task: {entry.Key}, Duration: {entry.Value:F2}s");
+        }
+        Debug.Log("===========================================");
+    }
+
     // Loads the next scene in the sequence
     public void LoadNextScene()
     {
@@ -89,7 +151,7 @@ public class CoreManager : MonoBehaviour
             {
                 SetCondition("PC");
                 if (int.TryParse(nextScene.Replace("PC_Task", ""), out int taskNum))
-                   SetTask(taskNum);
+                    SetTask(taskNum);
             }
             else if (nextScene.Contains("GC_Task"))
             {
@@ -98,10 +160,17 @@ public class CoreManager : MonoBehaviour
                     SetTask(taskNum);
             }
 
+            // print the final log
+            if (nextScene == "End")
+            {
+                PrintAllTaskTimes();
+            }
+
             Debug.Log($"[CoreManager] Loading scene: {nextScene}, Condition={currentCondition}, Task={currentTask}");
 
+
             // For task scenes, load the "TaskX" scene
-            if (nextScene.Contains("PC_Task") || nextScene.Contains("GC_Task")) 
+            if (nextScene.Contains("PC_Task") || nextScene.Contains("GC_Task"))
             {
                 SceneManager.LoadScene("Task" + currentTask);
             }
@@ -126,5 +195,10 @@ public class CoreManager : MonoBehaviour
     public int GetCurrentTask()
     {
         return currentTask;
+    }
+
+    public Dictionary<string, float> GetTaskDurations()
+    {
+        return _taskDurations;
     }
 }

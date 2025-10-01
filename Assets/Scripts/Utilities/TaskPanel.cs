@@ -111,6 +111,7 @@ public class TaskPanel : MonoBehaviour
             if (SoundManager.Instance )
             {
                 SoundManager.Instance.PlaySound();
+                CoreManager.Instance.StartCurrentTaskTime();
             }
         }
     }

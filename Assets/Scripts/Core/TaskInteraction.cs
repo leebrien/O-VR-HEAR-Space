@@ -14,16 +14,32 @@ public class TaskInteraction : MonoBehaviour
 
     private Vector3 _soundPosition;
     private TrackingSwitcher _trackingSwitcher;
-    
+
+    // Flag to ensure OnSuccess runs only once per task completion
+    private bool _isTaskCompleted = false;
+
     private void Awake()
     {
         if (CoreManager.Instance.currentTask == 1)
             _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+
+        _isTaskCompleted = false;
     }
 
     public void OnSuccess()
     {
+        // Guard clause
+        if (_isTaskCompleted) return;
+
         Debug.Log("HIT HIT HIT!");
+
+        if (CoreManager.Instance != null)
+        {
+            CoreManager.Instance.StopAndLogCurrentTaskTime();
+        }
+
+        _isTaskCompleted = true;
+
 
         // Stop sound
         if (taskPanel && SoundManager.Instance && !taskPanel.panelToHide.activeSelf)
@@ -34,7 +50,7 @@ public class TaskInteraction : MonoBehaviour
         // Show the panel again
         if (CoreManager.Instance.currentTask == 1)
             _trackingSwitcher.SwitchToHandsOnly();
-        
+
         if (taskPanel && !taskPanel.panelToHide.activeSelf)
         {
             taskPanel.ShowPanel();
@@ -63,27 +79,28 @@ public class TaskInteraction : MonoBehaviour
                 {
                     "PC" => "Personalized Cue",
                     "GC" => "Generic Cue",
-                      _  => "Unknown Cue"
+                    _ => "Unknown Cue"
                 };
-                
+
                 displayText.text = $"TASK {currentTask}: {taskType} ({cueType})";
                 interactionStatusText.text = "Status: Task Completed! You may proceed.";
                 interactionStatusText.gameObject.SetActive(true);
             }
 
         }
-        
+
         if (CoreManager.Instance.currentTask == 1)
             _trackingSwitcher.SwitchToHandsOnly();
     }
+
     public void revertAudioPosition()
-    {   
+    {
         if (audioRb != null)
         {
             audioRb.MovePosition(SoundManager.Instance._soundPosition);
             Debug.Log("Moved sound source to: " + _soundPosition);
         }
-        
+
     }
 
     public void SetMeshMaterial(Material newMaterial)
