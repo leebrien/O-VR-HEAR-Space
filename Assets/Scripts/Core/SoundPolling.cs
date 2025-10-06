@@ -8,6 +8,8 @@ public class SoundPolling : MonoBehaviour
 
    public IEnumerator PollAudio(System.Func<bool> isCancelled)
 {
+    Debug.Log("Went to poll audio from backend: " + backendURL);
+    
     using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(backendURL, AudioType.WAV))
 
     {

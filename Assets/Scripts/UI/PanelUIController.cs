@@ -46,6 +46,8 @@ public class PanelUIController : MonoBehaviour
         _cancellPolling = false;
         _proceedButton.interactable = false;
         
+        Debug.Log("1");
+        
         homeButton.SetActive(true);
         displayText.gameObject.SetActive(false);
         lobbyMenuDesign.SetActive(false);
@@ -54,11 +56,13 @@ public class PanelUIController : MonoBehaviour
         hintTitleTMP.text = "Please wait momentarily as we prepare the sounds for you";
         
         hearsonaCueDownloadDesign.SetActive(true);
+        Debug.Log("2");
         
         StartCoroutine(soundPolling.PollAudio(()=> _cancellPolling));
         
         if (SoundManager.Instance.hearsonaCue != null)
-        {
+        { 
+            Debug.Log("3");
             _proceedButton.interactable = true;
             pollTitleTMP.text = "Personalized cue retrieved successfully!";
             hintTitleTMP.text = "Your cue is now ready. You may now go back to the lobby and proceed.";
