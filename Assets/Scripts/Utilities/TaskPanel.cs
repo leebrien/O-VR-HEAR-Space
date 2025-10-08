@@ -18,10 +18,15 @@ public class TaskPanel : MonoBehaviour
 
     private void Awake()
     {
+       
         string currentCondition = CoreManager.Instance.currentCondition;
         int currentTask = CoreManager.Instance.currentTask;
         if (interactionStatusText) interactionStatusText.gameObject.SetActive(false);
-        if (currentTask == 1) _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+        if (currentTask == 1)
+        {
+            _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+           
+        }
         
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Task"))
         {
@@ -96,6 +101,8 @@ public class TaskPanel : MonoBehaviour
         if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher != null)
         {
             _trackingSwitcher.SwitchToControllersOnly();
+            //Make the raycast saber like here in this point in time and once it is on success in task interaction switch it back
+            
         }
         yield return new WaitForSeconds(1f);
 

@@ -21,7 +21,9 @@ public class TaskInteraction : MonoBehaviour
     private void Awake()
     {
         if (CoreManager.Instance.currentTask == 1)
+        {
             _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+        }
 
         _isTaskCompleted = false;
     }
@@ -46,9 +48,10 @@ public class TaskInteraction : MonoBehaviour
         {
             SoundManager.Instance.StopSound();
         }
+        
 
         // Show the panel again
-        if (CoreManager.Instance.currentTask == 1)
+        if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher != null)
             _trackingSwitcher.SwitchToHandsOnly();
 
         if (taskPanel && !taskPanel.panelToHide.activeSelf)
