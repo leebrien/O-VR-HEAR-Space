@@ -6,8 +6,8 @@ public class SoundPolling : MonoBehaviour
 {
     public string backendURL;
 
-   public IEnumerator PollAudio(System.Func<bool> isCancelled)
-{
+   public IEnumerator PollAudio(System.Func<bool> isCancelled,  System.Action<bool> onComplete)
+   {
     Debug.Log("Went to poll audio from backend: " + backendURL);
     
     using (UnityWebRequest www = UnityWebRequestMultimedia.GetAudioClip(backendURL, AudioType.WAV))
@@ -29,6 +29,7 @@ public class SoundPolling : MonoBehaviour
         if (www.result != UnityWebRequest.Result.Success)
         {
             Debug.Log("No audio available: " + www.error);
+            onComplete?.Invoke(false);
         }
         else
         {
@@ -43,6 +44,7 @@ public class SoundPolling : MonoBehaviour
                 SoundManager.Instance.hearsonaCue = hearsonaClip;
                 Debug.Log("Exported hearsona cue stored in SoundManager");
             }
+            onComplete?.Invoke(true);
         }
     }
 }

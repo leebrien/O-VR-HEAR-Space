@@ -40,6 +40,7 @@ public class PanelUIController : MonoBehaviour
     
     public void OnImportButtonClick()
     {
+        
         var pollTitleTMP = hearsonaCueDownloadDesign.transform.Find("pollTitle").GetComponent<TextMeshProUGUI>();
         var hintTitleTMP = hearsonaCueDownloadDesign.transform.Find("hintTitle").GetComponent<TextMeshProUGUI>();
         
@@ -56,17 +57,24 @@ public class PanelUIController : MonoBehaviour
         hintTitleTMP.text = "Please wait momentarily as we prepare the sounds for you";
         
         hearsonaCueDownloadDesign.SetActive(true);
+        hearsonaCueDownloadDesign.transform.Find("Spinner").gameObject.SetActive(true);
         Debug.Log("2");
         
-        StartCoroutine(soundPolling.PollAudio(()=> _cancellPolling));
-        
-        if (SoundManager.Instance.hearsonaCue != null)
-        { 
-            Debug.Log("3");
-            _proceedButton.interactable = true;
-            pollTitleTMP.text = "Personalized cue retrieved successfully!";
-            hintTitleTMP.text = "Your cue is now ready. You may now go back to the lobby and proceed.";
-        }
+        StartCoroutine(soundPolling.PollAudio(()=> _cancellPolling, success =>
+        {
+            if (success)
+            {
+                _proceedButton.interactable = true;
+                hearsonaCueDownloadDesign.transform.Find("Spinner").gameObject.SetActive(false);
+                pollTitleTMP.text = "Personalized cue retrieved successfully!";
+                hintTitleTMP.text = "Your cue is now ready. You may now go back to the lobby and proceed.";
+            }
+            else
+            {
+                pollTitleTMP.text = "Failed to retrieve cue!";
+                hintTitleTMP.text = "Please try again later.";
+            }
+        }));
     }
 
     public void OnGenericButtonClick()
