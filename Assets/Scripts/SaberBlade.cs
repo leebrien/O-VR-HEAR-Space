@@ -1,50 +1,49 @@
 using UnityEngine;
+using UnityEngine.XR;
 
 public class SaberBlade : MonoBehaviour
 {
     public string targetTag = "CueSource";
     public Material greenMaterial;
     public Material transparentMaterial;
-    public float saberLength = 4.5f;
-    public OVRInput.Controller controller;
-    public TaskInteraction taskInteraction;
+    public OVRInput.Controller controller; // Left or Right controller
+    public LayerMask targetLayer; // Layer mask to filter collisions
+    public TaskInteraction taskInteraction; // Must have OnSuccess() and SetMeshMaterial(Material)
 
-    private Collider _currentTarget;
+    private bool isColliding = false;
+    private bool wasTriggerPressed = false;
 
-    private void Update()
+    void Update()
     {
-        Ray ray = new Ray(transform.position, transform.forward);
-        RaycastHit hit;
+        bool isTriggerPressed = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, controller) > 0.1f;
 
-        bool hasHit = Physics.Raycast(ray, out hit, saberLength);
-
-        if (hasHit && hit.collider.CompareTag(targetTag))
+        // ONE-SHOT logic
+        if (isColliding && isTriggerPressed && !wasTriggerPressed)
         {
-            _currentTarget = hit.collider;
-
-            bool triggerHeld = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, controller);
-
-            
-            if (triggerHeld)
-            {
-                taskInteraction.SetMeshMaterial(greenMaterial);
-            }
-            else
-            {
-                taskInteraction.SetMeshMaterial(transparentMaterial);
-            }
-
-            // Trigger success
-            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, controller))
-            {
-                Debug.Log($"{controller}: Saber ray hit target {hit.collider.name}");
-                taskInteraction.OnSuccess();
-            }
+            taskInteraction.OnSuccess();
+            taskInteraction.SetMeshMaterial(greenMaterial);
         }
-        else
+        else if (!isTriggerPressed || !isColliding)
         {
-            _currentTarget = null;
+            taskInteraction.SetMeshMaterial(transparentMaterial);
         }
-        
+
+        wasTriggerPressed = isTriggerPressed;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (((1 << other.gameObject.layer) & targetLayer) != 0)
+        {
+            isColliding = true;
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (((1 << other.gameObject.layer) & targetLayer) != 0)
+        {
+            isColliding = false;
+        }
     }
 }

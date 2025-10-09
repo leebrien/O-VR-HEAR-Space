@@ -1,20 +1,29 @@
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class SaberManager : MonoBehaviour
 {
-    public SaberBlade leftSaber;
-    public SaberBlade rightSaber;
-
+    public GameObject leftSaber;
+    public GameObject rightSaber;
+    public GameObject leftXRRayInteractor = null;
+    public GameObject rightXRRayInteractor = null;
+    
+    
     public void EnableSabers()
     {
-        leftSaber.enabled = true;
-        rightSaber.enabled = true;
+        leftSaber.SetActive(true);
+        rightSaber.SetActive(true);
+        leftXRRayInteractor.SetActive(true);
+        rightXRRayInteractor.SetActive(true);
+        
     }
 
     public void DisableSabers()
     {
-        leftSaber.enabled = false;
-        rightSaber.enabled = false;
+        leftSaber.SetActive(false);
+        rightSaber.SetActive(false);
+        leftXRRayInteractor.SetActive(false);
+        rightXRRayInteractor.SetActive(false);
     }
 
 }
