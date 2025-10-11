@@ -13,8 +13,8 @@ public class SaberManager : MonoBehaviour
     {
         leftSaber.SetActive(true);
         rightSaber.SetActive(true);
-        leftXRRayInteractor.SetActive(true);
-        rightXRRayInteractor.SetActive(true);
+        leftXRRayInteractor.SetActive(false);
+        rightXRRayInteractor.SetActive(false);
         
     }
 
@@ -22,8 +22,8 @@ public class SaberManager : MonoBehaviour
     {
         leftSaber.SetActive(false);
         rightSaber.SetActive(false);
-        leftXRRayInteractor.SetActive(false);
-        rightXRRayInteractor.SetActive(false);
+        leftXRRayInteractor.SetActive(true);
+        rightXRRayInteractor.SetActive(true);
     }
 
 }

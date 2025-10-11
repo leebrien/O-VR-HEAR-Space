@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4390607415229288337}
   - component: {fileID: 4762171744725113942}
   - component: {fileID: 5407013276062159770}
+  - component: {fileID: 7836968590617067275}
   m_Layer: 0
   m_Name: Cylinder
   m_TagString: Untagged
@@ -113,6 +114,26 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!114 &7836968590617067275
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 677448593996700814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 660ec0a81dc8d4506805913cedfe0d06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SaberBlade
+  targetTag: CueSource
+  greenMaterial: {fileID: 0}
+  transparentMaterial: {fileID: 0}
+  controller: 0
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  taskInteraction: {fileID: 0}
 --- !u!1 &1005404368759751123
 GameObject:
   m_ObjectHideFlags: 0

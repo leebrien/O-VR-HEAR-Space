@@ -6,7 +6,7 @@ public class TaskInteraction : MonoBehaviour
     public Material successMaterial;
     public TaskPanel taskPanel;
     public GameObject[] environmentObjects;
-    public GameObject audioObject;
+    //public GameObject audioObject;
     public GameObject proceedButton;
     public TextMeshProUGUI displayText;
     public TextMeshProUGUI interactionStatusText;
