@@ -22,7 +22,7 @@ public class PanelUIController : MonoBehaviour
     private void Start()
     {
         _proceedButton = lobbyMenuDesign.transform.Find("rowButtonLayout/proceedButton").GetComponent<Button>();
-        _proceedButton.interactable = false;
+        _proceedButton.interactable = true;
     }
 
     public void OnPlayTutorialButtonClick()
@@ -43,11 +43,10 @@ public class PanelUIController : MonoBehaviour
         
         var pollTitleTMP = hearsonaCueDownloadDesign.transform.Find("pollTitle").GetComponent<TextMeshProUGUI>();
         var hintTitleTMP = hearsonaCueDownloadDesign.transform.Find("hintTitle").GetComponent<TextMeshProUGUI>();
+        var doneButtonPoll = hearsonaCueDownloadDesign.transform.Find("doneButton").GetComponent<Button>();
         
         _cancellPolling = false;
         _proceedButton.interactable = false;
-        
-        Debug.Log("1");
         
         homeButton.SetActive(true);
         displayText.gameObject.SetActive(false);
@@ -58,7 +57,6 @@ public class PanelUIController : MonoBehaviour
         
         hearsonaCueDownloadDesign.SetActive(true);
         hearsonaCueDownloadDesign.transform.Find("Spinner").gameObject.SetActive(true);
-        Debug.Log("2");
         
         StartCoroutine(soundPolling.PollAudio(()=> _cancellPolling, success =>
         {
@@ -66,6 +64,8 @@ public class PanelUIController : MonoBehaviour
             {
                 _proceedButton.interactable = true;
                 hearsonaCueDownloadDesign.transform.Find("Spinner").gameObject.SetActive(false);
+                homeButton.SetActive(false);
+                doneButtonPoll.gameObject.SetActive(true);
                 pollTitleTMP.text = "Personalized cue retrieved successfully!";
                 hintTitleTMP.text = "Your cue is now ready. You may now go back to the lobby and proceed.";
             }
@@ -118,13 +118,19 @@ public class PanelUIController : MonoBehaviour
         cueSelectDesign.SetActive(true);
     }
     
-    public void OnHomeButtonClick()
+    public void OnHomeButtonClick(bool donePolling = false)
     {
+        if (donePolling)
+        {
+            var doneButtonPoll = hearsonaCueDownloadDesign.transform.Find("doneButton").GetComponent<Button>();
+            doneButtonPoll.gameObject.SetActive(false);
+        }
+        
         homeButton.SetActive(false);
         if (preparationDesign.activeInHierarchy) preparationDesign.SetActive(false);
         if (cueSelectDesign.activeInHierarchy) cueSelectDesign.SetActive(false);
         if (hearsonaCueDownloadDesign.activeInHierarchy) hearsonaCueDownloadDesign.SetActive(false);
-        //displayText.gameObject.SetActive(false);
+        displayText.gameObject.SetActive(false);
         lobbyMenuDesign.SetActive(true);
     }
 }

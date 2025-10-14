@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class PracticeSoundManager : MonoBehaviour
 {
@@ -12,6 +14,15 @@ public class PracticeSoundManager : MonoBehaviour
     private readonly Vector3 _roomSize = new Vector3(8.0f, 2.5f, 8.0f);
 
     public PracticeUIManagement uiManager;
+    public SaberManager saberManager;
+    public TrackingSwitcher trackingSwitcher;
+    
+    private int recentTaskType = 0;
+
+    public void Start()
+    {
+        trackingSwitcher.SwitchToHandsOnly();
+    }
 
     public void PlayObject(int taskType)
     {
@@ -21,11 +32,15 @@ public class PracticeSoundManager : MonoBehaviour
         GameObject activeObject;
         if (taskType == 1)
         {
+            trackingSwitcher.SwitchToControllersOnly();
+            saberManager.EnableSabers();
             activeObject = pointingObject;
+            recentTaskType = 1;
         }
         else if (taskType == 2)
         {
             activeObject = grabbingObject;
+            recentTaskType = 2;
         }
         else
         {
@@ -82,13 +97,18 @@ public class PracticeSoundManager : MonoBehaviour
         objectPos.z = Mathf.Clamp(objectPos.z, -_roomSize.z / 2, _roomSize.z / 2);
     }
 
-    public void OnSuccess()
+    public void OnSuccess(Material material)
     {
         Debug.Log("HIT HIT HIT!");
 
-        GameObject activeObject = pointingObject.activeSelf ? pointingObject : (grabbingObject.activeSelf ? grabbingObject : null);
-
         StartCoroutine(CompleteTaskAfterDelay(2f));
+        if (recentTaskType == 1)
+        {
+            saberManager.DisableSabers();
+            trackingSwitcher.SwitchToHandsOnly();
+        }
+        
+        SetMeshMaterial(material);
     }
 
     // delay before compeletion
@@ -96,13 +116,13 @@ public class PracticeSoundManager : MonoBehaviour
     {
         yield return new WaitForSeconds(delay);
 
-        if (uiManager != null)
+        if (uiManager)
         {
             uiManager.OnTaskComplete();
         }
     }
 
-    public void setMeshMaterial(Material material)
+    public void SetMeshMaterial(Material material)
     {
         GameObject activeObject = pointingObject.activeSelf ? pointingObject : (grabbingObject.activeSelf ? grabbingObject : null);
 

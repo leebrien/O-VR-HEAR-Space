@@ -7,9 +7,9 @@ public class SaberBlade : MonoBehaviour
     public Material transparentMaterial;
     public OVRInput.Controller controller; // Left or Right controller
     public TaskInteraction taskInteraction; // Must have OnSuccess() and SetMeshMaterial(Material)
+    public LayerMask targetLayer;
 
-    private bool isColliding = false;
-    private bool wasTriggerPressed = false;
+    private bool _isColliding = false;
 
     void Start()
     {
@@ -21,17 +21,15 @@ public class SaberBlade : MonoBehaviour
         bool isTriggerPressed = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, controller) > 0.1f;
 
         // Debug trigger input state
-        if (isTriggerPressed && !wasTriggerPressed)
+        if (isTriggerPressed)
             Debug.Log("[SaberBlade] Trigger pressed on " + controller);
-
-        if (!isTriggerPressed && wasTriggerPressed)
-            Debug.Log("[SaberBlade] Trigger released on " + controller);
+        
 
         // ONE-SHOT logic
-        if (isColliding && isTriggerPressed && !wasTriggerPressed)
+        if (_isColliding && isTriggerPressed )
         {
             Debug.Log("[SaberBlade] SUCCESS: Trigger pulled while colliding with target!");
-            if (taskInteraction != null)
+            if (taskInteraction)
             {
                 taskInteraction.OnSuccess();
                 taskInteraction.SetMeshMaterial(greenMaterial);
@@ -41,29 +39,23 @@ public class SaberBlade : MonoBehaviour
                 Debug.LogWarning("[SaberBlade] taskInteraction not assigned!");
             }
         }
-        else if (!isTriggerPressed || !isColliding)
-        {
-            if (taskInteraction != null)
-                taskInteraction.SetMeshMaterial(transparentMaterial);
-        }
-
-        wasTriggerPressed = isTriggerPressed;
+        
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (1 << other.gameObject.layer != 0 && other.CompareTag(targetTag))
+        if (((1 << other.gameObject.layer) & targetLayer) != 0 && other.CompareTag(targetTag))
         {
-            isColliding = true;
+            _isColliding = true;
             Debug.Log("[SaberBlade] OnTriggerEnter with " + other.name);
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (1 << other.gameObject.layer != 0 && other.CompareTag(targetTag))
+        if (((1 << other.gameObject.layer) & targetLayer) != 0 && other.CompareTag(targetTag))
         {
-            isColliding = false;
+            _isColliding = false;
             Debug.Log("[SaberBlade] OnTriggerExit with " + other.name);
         }
     }
