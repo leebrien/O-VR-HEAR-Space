@@ -5,46 +5,58 @@ public class SaberBlade : MonoBehaviour
     public string targetTag = "CueSource";
     public Material greenMaterial;
     public Material transparentMaterial;
-    public float saberLength = 4.5f;
-    public OVRInput.Controller controller;
-    public TaskInteraction taskInteraction;
+    public OVRInput.Controller controller; // Left or Right controller
+    public TaskInteraction taskInteraction; // Must have OnSuccess() and SetMeshMaterial(Material)
+    public LayerMask targetLayer;
 
-    private Collider _currentTarget;
+    private bool _isColliding = false;
 
-    private void Update()
+    void Start()
     {
-        Ray ray = new Ray(transform.position, transform.forward);
-        RaycastHit hit;
+        Debug.Log("[SaberBlade] Script initialized on " + gameObject.name + " with controller: " + controller);
+    }
 
-        bool hasHit = Physics.Raycast(ray, out hit, saberLength);
+    void Update()
+    {
+        bool isTriggerPressed = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, controller) > 0.1f;
 
-        if (hasHit && hit.collider.CompareTag(targetTag))
+        // Debug trigger input state
+        if (isTriggerPressed)
+            Debug.Log("[SaberBlade] Trigger pressed on " + controller);
+        
+
+        // ONE-SHOT logic
+        if (_isColliding && isTriggerPressed )
         {
-            _currentTarget = hit.collider;
-
-            bool triggerHeld = OVRInput.Get(OVRInput.Button.PrimaryIndexTrigger, controller);
-
-            
-            if (triggerHeld)
+            Debug.Log("[SaberBlade] SUCCESS: Trigger pulled while colliding with target!");
+            if (taskInteraction)
             {
+                taskInteraction.OnSuccess();
                 taskInteraction.SetMeshMaterial(greenMaterial);
             }
             else
             {
-                taskInteraction.SetMeshMaterial(transparentMaterial);
+                Debug.LogWarning("[SaberBlade] taskInteraction not assigned!");
             }
-
-            // Trigger success
-            if (OVRInput.GetDown(OVRInput.Button.PrimaryIndexTrigger, controller))
-            {
-                Debug.Log($"{controller}: Saber ray hit target {hit.collider.name}");
-                taskInteraction.OnSuccess();
-            }
-        }
-        else
-        {
-            _currentTarget = null;
         }
         
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (((1 << other.gameObject.layer) & targetLayer) != 0 && other.CompareTag(targetTag))
+        {
+            _isColliding = true;
+            Debug.Log("[SaberBlade] OnTriggerEnter with " + other.name);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (((1 << other.gameObject.layer) & targetLayer) != 0 && other.CompareTag(targetTag))
+        {
+            _isColliding = false;
+            Debug.Log("[SaberBlade] OnTriggerExit with " + other.name);
+        }
     }
 }

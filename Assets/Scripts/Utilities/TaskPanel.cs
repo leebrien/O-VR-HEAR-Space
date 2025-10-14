@@ -15,6 +15,7 @@ public class TaskPanel : MonoBehaviour
 
     private const float TimerDuration = 5f;
     private TrackingSwitcher _trackingSwitcher;
+    private SaberManager _saberManager;
 
     private void Awake()
     {
@@ -25,6 +26,7 @@ public class TaskPanel : MonoBehaviour
         if (currentTask == 1)
         {
             _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+            _saberManager = FindFirstObjectByType<SaberManager>();
            
         }
         
@@ -101,7 +103,7 @@ public class TaskPanel : MonoBehaviour
         if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher != null)
         {
             _trackingSwitcher.SwitchToControllersOnly();
-            //Make the raycast saber like here in this point in time and once it is on success in task interaction switch it back
+            _saberManager.EnableSabers();
             
         }
         yield return new WaitForSeconds(1f);

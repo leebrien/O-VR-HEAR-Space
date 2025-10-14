@@ -6,7 +6,7 @@ public class TaskInteraction : MonoBehaviour
     public Material successMaterial;
     public TaskPanel taskPanel;
     public GameObject[] environmentObjects;
-    public GameObject audioObject;
+    //public GameObject audioObject;
     public GameObject proceedButton;
     public TextMeshProUGUI displayText;
     public TextMeshProUGUI interactionStatusText;
@@ -14,20 +14,23 @@ public class TaskInteraction : MonoBehaviour
 
     private Vector3 _soundPosition;
     private TrackingSwitcher _trackingSwitcher;
+    private SaberManager _saberManager;
 
     // Flag to ensure OnSuccess runs only once per task completion
-    private bool _isTaskCompleted = false;
+    private bool _isTaskCompleted;
 
     private void Awake()
     {
         if (CoreManager.Instance.currentTask == 1)
         {
             _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+            _saberManager = FindFirstObjectByType<SaberManager>();
         }
 
         _isTaskCompleted = false;
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     public void OnSuccess()
     {
         // Guard clause
@@ -35,7 +38,7 @@ public class TaskInteraction : MonoBehaviour
 
         Debug.Log("HIT HIT HIT!");
 
-        if (CoreManager.Instance != null)
+        if (CoreManager.Instance)
         {
             CoreManager.Instance.StopAndLogCurrentTaskTime();
         }
@@ -49,9 +52,11 @@ public class TaskInteraction : MonoBehaviour
             SoundManager.Instance.StopSound();
         }
         
+        if (_saberManager) _saberManager.DisableSabers();
+        
 
         // Show the panel again
-        if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher != null)
+        if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher)
             _trackingSwitcher.SwitchToHandsOnly();
 
         if (taskPanel && !taskPanel.panelToHide.activeSelf)
@@ -106,6 +111,7 @@ public class TaskInteraction : MonoBehaviour
 
     }
 
+    // ReSharper disable Unity.PerformanceAnalysis
     public void SetMeshMaterial(Material newMaterial)
     {
         foreach (GameObject envObject in environmentObjects)

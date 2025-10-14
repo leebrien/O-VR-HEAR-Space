@@ -128,8 +128,8 @@ public class SoundManager : MonoBehaviour
     {
         if (taskType == 1)
         {
-            soundPos.z += 2f;
-            soundPos.x += Random.Range(-3.75f, 3.75f);
+            soundPos.z += 2.5f;
+            soundPos.x += Random.Range(-3.5f, 3.5f);
         }
         else if (taskType == 2 || taskType == 3)
         {
