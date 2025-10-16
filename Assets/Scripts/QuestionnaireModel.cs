@@ -3,42 +3,56 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 
-// JSON data structure for deserialization
 [Serializable]
 public class QuestionData
 {
-    // The fields in a single question item in the JSON array
+    // Common fields
     public string id;
+    public string type;
     public string text;
-    public float minValue;
-    public float maxValue;
     public string lowLabel;
     public string highLabel;
+
+    // Slider-specific fields
+    public float minValue;
+    public float maxValue;
+
+    // Radio-specific field
+    public int steps;
 }
 
 [Serializable]
 public class QuestionnaireData
 {
-    // Survey and question list
     public string questionnaireName;
     public List<QuestionData> questions;
 }
 
 public class QuestionnaireModel : MonoBehaviour
 {
-    // Assign JSON in insepctor
     public TextAsset jsonFile;
 
     private QuestionnaireData data;
-    public int currentQuestionIndex { get; private set; } = 0;
-
-    // It maps a question ID to a score to save responses
+    public int currentQuestionIndex { get; private set; }
     public Dictionary<string, float> sessionResponses = new Dictionary<string, float>();
-
     private string logFileName = "VR_Questionnaire_Data.csv";
 
     void Awake()
     {
+        // Initialize with the file assigned in the inspector, if any
+        if (jsonFile != null)
+        {
+            InitializeWithData(jsonFile);
+        }
+    }
+
+    // Load and parse questionnaire file
+    public void InitializeWithData(TextAsset newJsonFile)
+    {
+        jsonFile = newJsonFile;
+        currentQuestionIndex = 0;
+        sessionResponses.Clear(); // Clear previous questionnaire's answers
+
         if (jsonFile != null)
         {
             try
@@ -52,18 +66,19 @@ public class QuestionnaireModel : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to deserialize JSON: {e.Message}");
+                Debug.LogError($"Failed to deserialize JSON in {jsonFile.name}: {e.Message}");
                 data = new QuestionnaireData { questions = new List<QuestionData>() };
             }
         }
         else
         {
             data = new QuestionnaireData { questions = new List<QuestionData>() };
-            Debug.LogError("JSON File not assigned. Initializing with no questions.");
+            Debug.LogError("JSON File is null. Cannot initialize model.");
         }
+
+        Debug.Log($"Model Initialized with Questionnaire: {QuestionnaireName}");
     }
 
-    // Core Model Methods
     public QuestionData GetCurrentQuestion()
     {
         if (data != null && data.questions != null && currentQuestionIndex >= 0 && currentQuestionIndex < data.questions.Count)
@@ -87,34 +102,35 @@ public class QuestionnaireModel : MonoBehaviour
         Debug.Log($"Logged response for {qID}: {score}");
     }
 
-    // Builds final log from dictionary
     public void SubmitData()
     {
         List<string> finalLog = new List<string>();
-        finalLog.Add("ParticipantID,QuestionID,Score,Timestamp"); // Header
+        string filePath = Path.Combine(Application.persistentDataPath, logFileName);
 
-        string participantID = "P001"; // This should be made dynamic later
+        // If the file doesn't exist, add the header
+        if (!File.Exists(filePath))
+        {
+            finalLog.Add("ParticipantID,Questionnaire,QuestionID,Score,Timestamp");
+        }
+
+        string participantID = "P001";
         string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
 
-        // Loop through the responses to build the final CSV data
         foreach (var response in sessionResponses)
         {
-            string logEntry = $"{participantID},{response.Key},{response.Value},{timestamp}";
+            // log
+            string logEntry = $"{participantID},{QuestionnaireName},{response.Key},{response.Value},{timestamp}";
             finalLog.Add(logEntry);
         }
 
-        string filePath = Path.Combine(Application.persistentDataPath, logFileName);
-        File.WriteAllLines(filePath, finalLog);
+        // Append code
+        File.AppendAllLines(filePath, finalLog);
         Debug.Log($"Data saved successfully to: {filePath}");
     }
 
     public string QuestionnaireName
     {
-        get { return data != null ? data.questionnaireName : "Default Questionnaire"; }
+        get { return data != null ? data.questionnaireName : "No Questionnaire Loaded"; }
     }
-
-    public List<QuestionData> GetQuestions()
-    {
-        return data.questions;
-    }
+    
 }
