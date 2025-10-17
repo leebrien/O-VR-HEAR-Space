@@ -694,6 +694,7 @@ GameObject:
   - component: {fileID: 8134823359557455944}
   - component: {fileID: 6867836435928325671}
   - component: {fileID: 4024583662727515559}
+  - component: {fileID: 4167243706702967357}
   m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
@@ -794,3 +795,18 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 10209, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!114 &4167243706702967357
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7102823349759049786}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e3257ac02c1004644a296a22beb8b9ea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DynamicGrid
+  gridMaterial: {fileID: 2100000, guid: 587b7c252d96b4e609488e0dffdf7548, type: 2}
+  target: {fileID: 0}
+  yOffset: 0

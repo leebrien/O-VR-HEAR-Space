@@ -4,42 +4,35 @@ public class SaberBlade : MonoBehaviour
 {
     public string targetTag = "CueSource";
     public Material greenMaterial;
-    public Material transparentMaterial;
     public OVRInput.Controller controller; // Left or Right controller
     public TaskInteraction taskInteraction; // Must have OnSuccess() and SetMeshMaterial(Material)
+    public PracticeSoundManager practiceSoundManager;
     public LayerMask targetLayer;
 
     private bool _isColliding = false;
+    private string _sceneName;
 
     void Start()
     {
-        Debug.Log("[SaberBlade] Script initialized on " + gameObject.name + " with controller: " + controller);
+        _sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
     }
 
     void Update()
     {
         bool isTriggerPressed = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, controller) > 0.1f;
 
-        // Debug trigger input state
-        if (isTriggerPressed)
-            Debug.Log("[SaberBlade] Trigger pressed on " + controller);
-        
-
         // ONE-SHOT logic
-        if (_isColliding && isTriggerPressed )
+        if (_isColliding && isTriggerPressed)
         {
-            Debug.Log("[SaberBlade] SUCCESS: Trigger pulled while colliding with target!");
             if (taskInteraction)
             {
                 taskInteraction.OnSuccess();
                 taskInteraction.SetMeshMaterial(greenMaterial);
-            }
-            else
+            } else if (_sceneName.Contains("Practice"))
             {
-                Debug.LogWarning("[SaberBlade] taskInteraction not assigned!");
+                practiceSoundManager.OnSuccess(greenMaterial);
             }
         }
-        
     }
 
     private void OnTriggerEnter(Collider other)

@@ -1,6 +1,6 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
+using System.Globalization;
 using TMPro;
 
 public class TaskPanel : MonoBehaviour
@@ -94,7 +94,7 @@ public class TaskPanel : MonoBehaviour
 
         while (currentTime > 0)
         {
-            counterTextHolder.text = Mathf.Ceil(currentTime).ToString();
+            counterTextHolder.text = Mathf.Ceil(currentTime).ToString(CultureInfo.InvariantCulture);
             yield return new WaitForSeconds(1f);
             currentTime--;
         }

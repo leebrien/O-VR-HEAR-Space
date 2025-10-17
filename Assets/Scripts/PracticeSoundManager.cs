@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Unity.Multiplayer.Center.Common;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -18,10 +19,24 @@ public class PracticeSoundManager : MonoBehaviour
     public TrackingSwitcher trackingSwitcher;
     
     private int recentTaskType = 0;
+    private Renderer _pointingRenderer;
+    private Renderer _grabbingRenderer;
+    private bool _firstLog;
 
     public void Start()
     {
-        trackingSwitcher.SwitchToHandsOnly();
+        _firstLog = CoreManager.Instance.GetFirstLog();
+        if (_firstLog)
+        {
+           
+        }
+        if (pointingObject) _pointingRenderer = pointingObject.GetComponent<Renderer>();
+        if (grabbingObject) _grabbingRenderer = grabbingObject.GetComponent<Renderer>();
+    }
+
+    public TrackingSwitcher GetTrackingSwitcher()
+    {
+        return trackingSwitcher ?? null;
     }
 
     public void PlayObject(int taskType)
@@ -67,17 +82,24 @@ public class PracticeSoundManager : MonoBehaviour
         grabbingObject?.SetActive(false);
     }
 
+    public bool GetLoggingStatus()
+    {
+        return _firstLog;
+    }
+
     private void GenerateObjectPosition(ref Vector3 objectPos, int taskType)
     {
         if (taskType == 1)
         {
-            objectPos.z += 3.5f;
+            objectPos.z += 2.5f;
             objectPos.x += Random.Range(-3.75f, 3.75f);
         }
         else if (taskType == 2 || taskType == 3)
         {
             int direction = Random.Range(0, 8);
-            float offset = Random.Range(1.75f, 3.75f);
+           // float offset = Random.Range(1.75f, 3.75f);
+            float[] allowedoffsets = { 0.75f, 1f, 1.25f };
+            float offset = allowedoffsets[Random.Range(0, allowedoffsets.Length)];
 
             switch (direction)
             {
@@ -99,16 +121,14 @@ public class PracticeSoundManager : MonoBehaviour
 
     public void OnSuccess(Material material)
     {
-        Debug.Log("HIT HIT HIT!");
-
-        StartCoroutine(CompleteTaskAfterDelay(2f));
+        
+        SetMeshMaterial(material);
         if (recentTaskType == 1)
         {
             saberManager.DisableSabers();
             trackingSwitcher.SwitchToHandsOnly();
         }
-        
-        SetMeshMaterial(material);
+        StartCoroutine(CompleteTaskAfterDelay(0.8f));
     }
 
     // delay before compeletion
@@ -124,16 +144,12 @@ public class PracticeSoundManager : MonoBehaviour
 
     public void SetMeshMaterial(Material material)
     {
-        GameObject activeObject = pointingObject.activeSelf ? pointingObject : (grabbingObject.activeSelf ? grabbingObject : null);
+        Renderer activeRenderer = pointingObject.activeSelf ? _pointingRenderer :
+            (grabbingObject.activeSelf ? _grabbingRenderer : null);
 
-        if (activeObject != null)
+        if (activeRenderer)
         {
-            // change material to green
-            Renderer objectRenderer = activeObject.GetComponent<Renderer>();
-            if (objectRenderer != null)
-            {
-                objectRenderer.material = material;
-            }
+            activeRenderer.material = material;
         }
     }
     
