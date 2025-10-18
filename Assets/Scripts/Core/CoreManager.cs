@@ -20,7 +20,7 @@ public class CoreManager : MonoBehaviour
 
     private bool _isTransitioning;
 
-    private bool _firstLog = true;
+    public bool _firstLog = true;
 
     private void Start()
     {
