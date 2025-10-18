@@ -24,19 +24,19 @@ public class QuestionnaireManager : MonoBehaviour
     {
         if (currentQuestionnaireIndex < questionnaireSequence.Count)
         {
-            Debug.Log($"--- Starting Questionnaire {currentQuestionnaireIndex + 1} ---");
+            //Debug.Log($" Starting Questionnaire {currentQuestionnaireIndex + 1}");
             TextAsset nextFile = questionnaireSequence[currentQuestionnaireIndex];
             questionnaireController.StartQuestionnaire(nextFile);
         }
         else
         {
-            Debug.Log("--- Study Completed! All questionnaires are finished. ---");
+            //Debug.Log("There are no more questionnaires.");
         }
     }
 
     private void HandleQuestionnaireCompleted()
     {
-        Debug.Log("--- Questionnaire Completed, moving to next. ---");
+        //Debug.Log("Questionnaire Completed");
         currentQuestionnaireIndex++;
         StartNextQuestionnaire();
     }

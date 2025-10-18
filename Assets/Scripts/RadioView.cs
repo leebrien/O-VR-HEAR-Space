@@ -2,13 +2,18 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System;
 
 public class RadioView : MonoBehaviour
 {
+    // Prevents null responses
+    public static event Action OnRadioSelectionMade;
+
+    [Header("UI References")]
     [SerializeField] private TextMeshProUGUI lowLabelText;
     [SerializeField] private TextMeshProUGUI highLabelText;
 
-    //Assign all your radio button toggles here in order from left to right
+    [Tooltip("Assign all your radio button toggles here in order from left to right.")]
     [SerializeField] private List<Toggle> radioToggles;
 
     private ToggleGroup toggleGroup;
@@ -19,6 +24,21 @@ public class RadioView : MonoBehaviour
         if (toggleGroup == null)
         {
             Debug.LogError("No ToggleGroup found for the RadioView!");
+        }
+
+        // Toggle listener
+        foreach (var toggle in radioToggles)
+        {
+            toggle.onValueChanged.AddListener(OnToggleChanged);
+        }
+    }
+
+    private void OnToggleChanged(bool isOn)
+    {
+        if (isOn)
+        {
+            // Reponse has been made
+            OnRadioSelectionMade?.Invoke();
         }
     }
 

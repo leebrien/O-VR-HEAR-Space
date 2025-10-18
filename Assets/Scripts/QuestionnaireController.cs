@@ -25,25 +25,38 @@ public class QuestionnaireController : MonoBehaviour
     [SerializeField] private TextMeshProUGUI forwardButtonText;
     [SerializeField] private Button backButton;
 
+    private bool isSubmitting = false;
+
     void Awake()
     {
         sliderView = sliderViewGO.GetComponent<SliderView>();
         radioView = radioViewGO.GetComponent<RadioView>();
 
-        // for debugging 
-        if (questionnairePanel == null) Debug.LogError("Questionnaire Panel GameObject is not assigned in the Inspector!", this.gameObject);
-        if (questionnaireUIView == null) Debug.LogError("QuestionnaireUIView is not assigned in the Inspector!", this.gameObject);
-        if (sliderView == null) Debug.LogError("The 'sliderViewGO' GameObject is missing the 'SliderView' script component!", this.gameObject);
-        if (radioView == null) Debug.LogError("The 'radioViewGO' GameObject is missing the 'RadioView' script component!", this.gameObject);
+        RadioView.OnRadioSelectionMade += HandleRadioSelectionMade;
     }
 
+    private void OnDestroy()
+    {
+        RadioView.OnRadioSelectionMade -= HandleRadioSelectionMade;
+    }
+
+    private void HandleRadioSelectionMade()
+    {
+        // As soon as a selection is made, make the button clickable
+        forwardButton.interactable = true;
+
+    }
     public void StartQuestionnaire(TextAsset jsonFile)
     {
+
         model.InitializeWithData(jsonFile);
         questionnairePanel.SetActive(true);
+        isSubmitting = false;
 
-        forwardButton.onClick.RemoveAllListeners();
+    // This is needed for transitioning to the next questionnaire.
+    forwardButton.onClick.RemoveAllListeners();
         backButton.onClick.RemoveAllListeners();
+
         forwardButton.onClick.AddListener(OnForwardClicked);
         backButton.onClick.AddListener(OnBackClicked);
 
@@ -53,21 +66,26 @@ public class QuestionnaireController : MonoBehaviour
         }
         else
         {
-            Debug.LogError("No questions loaded! Check JSON file.");
+            Debug.LogError("No questionnaires loaded.");
         }
     }
 
     private void DisplayCurrentQuestion()
     {
         QuestionData qData = model.GetCurrentQuestion();
+        
+        // guard clause
         if (qData == null) return;
 
-        Debug.Log($"Controller displaying question index: {model.currentQuestionIndex}");
+        // This checks which answer type UI to display
+        // If you made your own UI, you have to manually insert it here.
 
         if (qData.type == "slider")
         {
             sliderViewGO.SetActive(true);
             radioViewGO.SetActive(false);
+
+            forwardButton.interactable = true;
 
             // 1. Update Main Questionnaire View
             questionnaireUIView.UpdateView(
@@ -90,6 +108,9 @@ public class QuestionnaireController : MonoBehaviour
             sliderViewGO.SetActive(false);
             radioViewGO.SetActive(true);
 
+            // Disable at first to prevent null responses
+            forwardButton.interactable = false;
+
             // 1. Update the Main Questionnaire View
             questionnaireUIView.UpdateView(
                 model.QuestionnaireName,
@@ -106,7 +127,8 @@ public class QuestionnaireController : MonoBehaviour
             );
         }
 
-        // Check for a saved response and update the CORRECT view
+        // This is for backtracking and reloading previous answered questions
+        // If you made your own UI, you have to manually insert it here.
         if (model.sessionResponses.ContainsKey(qData.id))
         {
             float savedScore = model.sessionResponses[qData.id];
@@ -117,12 +139,16 @@ public class QuestionnaireController : MonoBehaviour
             else if (qData.type == "radio")
             {
                 radioView.SetScore(savedScore);
+                
+                // Reenable
+                forwardButton.interactable = true;
             }
         }
 
         UpdateNavigationButtons();
     }
 
+    // Set 'Next' button to 'Submit' at the final question.
     private void UpdateNavigationButtons()
     {
         int total = model.GetTotalQuestions();
@@ -133,6 +159,9 @@ public class QuestionnaireController : MonoBehaviour
 
     public void OnForwardClicked()
     {
+        // gate
+        if (isSubmitting) return;
+
         QuestionData qData = model.GetCurrentQuestion();
         if (qData == null) return;
 
@@ -142,13 +171,17 @@ public class QuestionnaireController : MonoBehaviour
             model.LogResponse(qData.id, score);
         }
 
+        // Submit questionnaire
         if (model.currentQuestionIndex == model.GetTotalQuestions() - 1)
         {
-            model.SubmitData();
-            sliderViewGO.SetActive(false);
-            radioViewGO.SetActive(false);
-            Debug.Log("Questionnaire finished and data submitted.");
+            // Set the flag so this block can't run again
+            isSubmitting = true;
 
+            model.SubmitData();
+
+            questionnairePanel.SetActive(false);
+
+            Debug.Log("Questionnaire finished.");
             OnQuestionnaireCompleted?.Invoke();
             return;
         }
@@ -176,6 +209,7 @@ public class QuestionnaireController : MonoBehaviour
         }
     }
 
+    // If you made your own UI, you have to manually insert it here.
     private float GetCurrentScore(QuestionData qData)
     {
         if (qData.type == "slider")

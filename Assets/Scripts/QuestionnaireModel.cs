@@ -28,6 +28,43 @@ public class QuestionnaireData
     public List<QuestionData> questions;
 }
 
+
+// Json structure for saving
+
+[Serializable]
+public class ResponseItem
+{
+    public string id;
+    public float score;
+
+    public ResponseItem(string id, float score)
+    {
+        this.id = id;
+        this.score = score;
+    }
+}
+
+[Serializable]
+public class QuestionnaireResult
+{
+    public string participantID;
+    public string questionnaireName;
+    public string timestamp;
+    public List<ResponseItem> responses;
+}
+
+[Serializable]
+public class AllResultsData
+{
+    // A top-level object to hold a list of all results
+    public List<QuestionnaireResult> LogResponse;
+
+    public AllResultsData()
+    {
+        LogResponse = new List<QuestionnaireResult>();
+    }
+}
+
 public class QuestionnaireModel : MonoBehaviour
 {
     public TextAsset jsonFile;
@@ -35,23 +72,22 @@ public class QuestionnaireModel : MonoBehaviour
     private QuestionnaireData data;
     public int currentQuestionIndex { get; private set; }
     public Dictionary<string, float> sessionResponses = new Dictionary<string, float>();
-    private string logFileName = "VR_Questionnaire_Data.csv";
+
+    private string logFileName = "VR_Questionnaire_Data.json";
 
     void Awake()
     {
-        // Initialize with the file assigned in the inspector, if any
         if (jsonFile != null)
         {
             InitializeWithData(jsonFile);
         }
     }
 
-    // Load and parse questionnaire file
     public void InitializeWithData(TextAsset newJsonFile)
     {
         jsonFile = newJsonFile;
         currentQuestionIndex = 0;
-        sessionResponses.Clear(); // Clear previous questionnaire's answers
+        sessionResponses.Clear();
 
         if (jsonFile != null)
         {
@@ -75,8 +111,6 @@ public class QuestionnaireModel : MonoBehaviour
             data = new QuestionnaireData { questions = new List<QuestionData>() };
             Debug.LogError("JSON File is null. Cannot initialize model.");
         }
-
-        Debug.Log($"Model Initialized with Questionnaire: {QuestionnaireName}");
     }
 
     public QuestionData GetCurrentQuestion()
@@ -104,33 +138,66 @@ public class QuestionnaireModel : MonoBehaviour
 
     public void SubmitData()
     {
-        List<string> finalLog = new List<string>();
-        string filePath = Path.Combine(Application.persistentDataPath, logFileName);
-
-        // If the file doesn't exist, add the header
-        if (!File.Exists(filePath))
+        // 1. Create a new result object for the questionnaire just completed
+        QuestionnaireResult newResult = new QuestionnaireResult
         {
-            finalLog.Add("ParticipantID,Questionnaire,QuestionID,Score,Timestamp");
-        }
+            participantID = "P001", // This should be made dynamic later
+            questionnaireName = this.QuestionnaireName,
+            timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+            responses = new List<ResponseItem>()
+        };
 
-        string participantID = "P001";
-        string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
+        // 2. Convert the sessionResponses dictionary to the ResponseItem list
+        //    (JsonUtility can't serialize dictionaries directly)
         foreach (var response in sessionResponses)
         {
-            // log
-            string logEntry = $"{participantID},{QuestionnaireName},{response.Key},{response.Value},{timestamp}";
-            finalLog.Add(logEntry);
+            newResult.responses.Add(new ResponseItem(response.Key, response.Value));
         }
 
-        // Append code
-        File.AppendAllLines(filePath, finalLog);
-        Debug.Log($"Data saved successfully to: {filePath}");
+        // 3. Load the existing results file (if it exists)
+        string filePath = Path.Combine(Application.persistentDataPath, logFileName);
+        AllResultsData LogResponse;
+
+        if (File.Exists(filePath))
+        {
+            try
+            {
+                string existingJson = File.ReadAllText(filePath);
+                LogResponse = JsonUtility.FromJson<AllResultsData>(existingJson);
+                if (LogResponse == null) // Handle empty or corrupted file
+                {
+                    LogResponse = new AllResultsData();
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"Error reading existing results file: {e.Message}");
+                LogResponse = new AllResultsData();
+            }
+        }
+        else
+        {
+            LogResponse = new AllResultsData();
+        }
+
+        // 4. Add the new result to the list
+        LogResponse.LogResponse.Add(newResult);
+
+        // 5. Serialize the entire collection and overwrite the file
+        try
+        {
+            string jsonToSave = JsonUtility.ToJson(LogResponse, true);
+            File.WriteAllText(filePath, jsonToSave);
+            Debug.Log($"Data saved successfully to: {filePath}");
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to save JSON data: {e.Message}");
+        }
     }
 
     public string QuestionnaireName
     {
         get { return data != null ? data.questionnaireName : "No Questionnaire Loaded"; }
     }
-    
 }
