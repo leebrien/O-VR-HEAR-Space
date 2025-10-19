@@ -16,10 +16,14 @@ public class QuestionnaireController : MonoBehaviour
     // Reference to Game Objects
     [SerializeField] private GameObject sliderViewGO;
     [SerializeField] private GameObject radioViewGO;
+    [SerializeField] private GameObject multipleChoiceViewGO;
+    [SerializeField] private GameObject cuePreferenceViewGO;
 
     // Reference to Scripts
     private SliderView sliderView;
-    private RadioView radioView;
+    private ToggleGroupView radioView;
+    private ToggleGroupView multipleChoiceView;
+    private ToggleGroupView cuePreferenceView;
 
     [SerializeField] private Button forwardButton;
     [SerializeField] private TextMeshProUGUI forwardButtonText;
@@ -30,22 +34,23 @@ public class QuestionnaireController : MonoBehaviour
     void Awake()
     {
         sliderView = sliderViewGO.GetComponent<SliderView>();
-        radioView = radioViewGO.GetComponent<RadioView>();
+        radioView = radioViewGO.GetComponent<ToggleGroupView>();
+        multipleChoiceView = multipleChoiceViewGO.GetComponent<ToggleGroupView>();
+        cuePreferenceView = cuePreferenceViewGO.GetComponent<ToggleGroupView>();
 
-        RadioView.OnRadioSelectionMade += HandleRadioSelectionMade;
+        ToggleGroupView.OnSelectionMade += HandleSelectionMade;
     }
 
     private void OnDestroy()
     {
-        RadioView.OnRadioSelectionMade -= HandleRadioSelectionMade;
+        ToggleGroupView.OnSelectionMade -= HandleSelectionMade;
     }
 
-    private void HandleRadioSelectionMade()
+    private void HandleSelectionMade()
     {
-        // As soon as a selection is made, make the button clickable
         forwardButton.interactable = true;
-
     }
+
     public void StartQuestionnaire(TextAsset jsonFile)
     {
 
@@ -70,12 +75,22 @@ public class QuestionnaireController : MonoBehaviour
         }
     }
 
+    private void DeactivateAllViews()
+    {
+        sliderViewGO.SetActive(false);
+        radioViewGO.SetActive(false);
+        multipleChoiceViewGO.SetActive(false);
+        cuePreferenceViewGO.SetActive(false);
+    }
+
     private void DisplayCurrentQuestion()
     {
         QuestionData qData = model.GetCurrentQuestion();
         
         // guard clause
         if (qData == null) return;
+
+        DeactivateAllViews();
 
         // This checks which answer type UI to display
         // If you made your own UI, you have to manually insert it here.
@@ -126,6 +141,20 @@ public class QuestionnaireController : MonoBehaviour
                 qData.steps
             );
         }
+        else if (qData.type == "multipleChoice")
+        {
+            multipleChoiceViewGO.SetActive(true);
+            forwardButton.interactable = false;
+            questionnaireUIView.UpdateView(model.QuestionnaireName, qData.text, model.currentQuestionIndex, model.GetTotalQuestions());
+            multipleChoiceView.ResetView();
+        }
+        else if (qData.type == "cuePreference")
+        {
+            cuePreferenceViewGO.SetActive(true);
+            forwardButton.interactable = false;
+            questionnaireUIView.UpdateView(model.QuestionnaireName, qData.text, model.currentQuestionIndex, model.GetTotalQuestions());
+            cuePreferenceView.ResetView();
+        }
 
         // This is for backtracking and reloading previous answered questions
         // If you made your own UI, you have to manually insert it here.
@@ -141,6 +170,16 @@ public class QuestionnaireController : MonoBehaviour
                 radioView.SetScore(savedScore);
                 
                 // Reenable
+                forwardButton.interactable = true;
+            }
+            else if (qData.type == "multipleChoice")
+            {
+                multipleChoiceView.SetScore(savedScore);
+                forwardButton.interactable = true;
+            }
+            else if (qData.type == "cuePreference")
+            {
+                cuePreferenceView.SetScore(savedScore);
                 forwardButton.interactable = true;
             }
         }
@@ -219,6 +258,14 @@ public class QuestionnaireController : MonoBehaviour
         else if (qData.type == "radio")
         {
             return radioView.GetScore();
+        }
+        else if (qData.type == "multipleChoice")
+        {
+            return multipleChoiceView.GetScore();
+        }
+        else if (qData.type == "cuePreference")
+        {
+            return cuePreferenceView.GetScore();
         }
         return -1f;
     }
