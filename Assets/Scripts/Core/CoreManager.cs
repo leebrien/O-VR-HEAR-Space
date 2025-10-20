@@ -4,7 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Oculus.Interaction;
-
+using System.IO;
+using System;
 
 public class CoreManager : MonoBehaviour
 {
@@ -12,6 +13,8 @@ public class CoreManager : MonoBehaviour
 
     public string currentCondition;
     public int currentTask;
+
+    private string sessionParticipantID;
 
     private int _currentIndex;
     private string[] _sceneOrder;
@@ -43,6 +46,8 @@ public class CoreManager : MonoBehaviour
     public GameObject GetLeftSaber() => _leftSaber;
     public GameObject GetRightSaber() => _rightSaber;
     public Transform GetCenterEyeAnchor() => _centerEyeAnchor;
+    public string GetSessionParticipantID() => sessionParticipantID;
+
 
     private PracticeSoundManager _soundManager;
     private TaskInteraction _taskInteraction;
@@ -53,16 +58,16 @@ public class CoreManager : MonoBehaviour
         GameObject leftSaber, GameObject rightSaber,
         Transform centerEyeAnchor)
     {
-        Debug.Log("[CoreManager] Setting rig references." + 
-                  "OVR Rig: " + rig +
-                  ", Hands: " + hands +
-                  ", Controllers: " + controllers +
-                  ", Left XR Ray Interactor: " + leftXRRayInteractor +
-                  ", Right XR Ray Interactor: " + rightXRRayInteractor +
-                  ", Left Saber: " + leftSaber +
-                  ", Right Saber: " + rightSaber +
-                  ", Center Eye Anchor: " + centerEyeAnchor);
-        
+        Debug.Log("[CoreManager] Setting rig references." +
+                    "OVR Rig: " + rig +
+                    ", Hands: " + hands +
+                    ", Controllers: " + controllers +
+                    ", Left XR Ray Interactor: " + leftXRRayInteractor +
+                    ", Right XR Ray Interactor: " + rightXRRayInteractor +
+                    ", Left Saber: " + leftSaber +
+                    ", Right Saber: " + rightSaber +
+                    ", Center Eye Anchor: " + centerEyeAnchor);
+
         _ovrRig = rig;
         _ovrHands = hands;
         _ovrControllers = controllers;
@@ -84,7 +89,7 @@ public class CoreManager : MonoBehaviour
     {
         firstLog = value;
     }
-    
+
 
     public bool GetFirstLog()
     {
@@ -100,6 +105,10 @@ public class CoreManager : MonoBehaviour
             DontDestroyOnLoad(gameObject);
             _taskDurations = new Dictionary<string, float>();
             SceneManager.sceneLoaded += OnSceneLoaded;
+
+            // Calculate participant ID once on Awake
+            sessionParticipantID = CalculateNextParticipantID();
+            Debug.Log($"[CoreManager] Session started for Participant ID: {sessionParticipantID}");
         }
         else
         {
@@ -113,14 +122,13 @@ public class CoreManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        if (scene.name == "PracticeScene" || scene.name == "Task1")
+        // Check if scene name contains "Task" instead of just "Task1"
+        if (scene.name == "PracticeScene" || scene.name.Contains("Task"))
             StartCoroutine(LinkDependenciesWhenReady());
     }
 
-    // ReSharper disable Unity.PerformanceAnalysis
     private IEnumerator LinkDependenciesWhenReady()
     {
-        // Wait until the rig references have been set by the initializer script.
         yield return new WaitUntil(() => _rigReferencesSet);
         LinkDependenciesImmediate();
     }
@@ -134,15 +142,20 @@ public class CoreManager : MonoBehaviour
         {
             Debug.Log("[Dependency] In practice scene, linking sound manager to sabers." + SceneManager.GetActiveScene().name);
             _soundManager = FindFirstObjectByType<PracticeSoundManager>();
-            _leftSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>().UpdateSceneReferences(_soundManager, null);
-            _rightSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>().UpdateSceneReferences(_soundManager, null);
+            if (_leftSaber != null && _soundManager != null)
+                _leftSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>()?.UpdateSceneReferences(_soundManager, null);
+            if (_rightSaber != null && _soundManager != null)
+                _rightSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>()?.UpdateSceneReferences(_soundManager, null);
         }
         else if (active.Contains("Task"))
         {
-            Debug.Log("[Dependency] In Task scene, linking sound TaskInteraction to sabers." + SceneManager.GetActiveScene().name);
+            Debug.Log("[Dependency] In Task scene, linking TaskInteraction to sabers." + SceneManager.GetActiveScene().name);
             _taskInteraction = FindFirstObjectByType<TaskInteraction>();
-            _leftSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>().UpdateSceneReferences(null, _taskInteraction);
-            _rightSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>().UpdateSceneReferences(null, _taskInteraction);
+
+            if (_leftSaber != null && _taskInteraction != null)
+                _leftSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>()?.UpdateSceneReferences(null, _taskInteraction);
+            if (_rightSaber != null && _taskInteraction != null)
+                _rightSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>()?.UpdateSceneReferences(null, _taskInteraction);
         }
 
     }
@@ -169,13 +182,15 @@ public class CoreManager : MonoBehaviour
         }
         else if (currentCondition == "GC")
         {
-            _sceneOrder = new []
+            _sceneOrder = new[]
             {
                 "GC_Task1", "Questionnaire", "PC_Task1", "Questionnaire", "Break",
                 "GC_Task2", "Questionnaire", "PC_Task2", "Questionnaire", "Break",
                 "GC_Task3", "Questionnaire", "PC_Task3", "Questionnaire", "End"
             };
         }
+        // Reset scene index when building order
+        _currentIndex = 0;
     }
 
     public void StartCurrentTaskTime()
@@ -191,17 +206,25 @@ public class CoreManager : MonoBehaviour
         if (!string.IsNullOrEmpty(_runningTaskIdentifier) && _taskStartTime > 0f)
         {
             float duration = Time.time - _taskStartTime;
-            int completedSceneIndex = _currentIndex - 1;
+            int completedSceneIndex = _currentIndex;
             string uniqueLogKey = $"{_runningTaskIdentifier}_Run_End_Index_{completedSceneIndex}";
 
             try
             {
-                _taskDurations.Add(uniqueLogKey, duration);
-                Debug.Log($"[CoreManager] TASK COMPLETED: {uniqueLogKey} = {duration:F2}s");
+                if (!_taskDurations.ContainsKey(uniqueLogKey))
+                {
+                    _taskDurations.Add(uniqueLogKey, duration);
+                    Debug.Log($"[CoreManager] TASK COMPLETED: {uniqueLogKey} = {duration:F2}s");
+                }
+                else
+                {
+                    Debug.LogWarning($"[CoreManager] Attempted to log duplicate key: {uniqueLogKey}. Ignoring.");
+                }
+
             }
             catch (System.ArgumentException e)
             {
-                Debug.LogError($"[CoreManager] Duplicate log key: {e.Message}");
+                Debug.LogError($"[CoreManager] Error adding log key: {e.Message}");
             }
 
             _taskStartTime = 0f;
@@ -214,7 +237,7 @@ public class CoreManager : MonoBehaviour
         Debug.Log("===========================================");
         Debug.Log("[CoreManager] --- FINAL TASK TIME LOG ---");
         Debug.Log($"Total Logged Entries: {_taskDurations.Count}");
-        foreach (var entry in _taskDurations)
+        foreach (var entry in _taskDurations.OrderBy(kvp => kvp.Key))
             Debug.Log($"Task: {entry.Key}, Duration: {entry.Value:F2}s");
         Debug.Log("===========================================");
     }
@@ -225,12 +248,13 @@ public class CoreManager : MonoBehaviour
         if (_isTransitioning) return;
         if (_sceneOrder == null || _sceneOrder.Length == 0)
         {
-            Debug.LogWarning("Scene order not built.");
+            Debug.LogWarning("[CoreManager] Scene order not built. Cannot load next scene.");
             return;
         }
         if (_currentIndex >= _sceneOrder.Length)
         {
-            Debug.Log("No more scenes to load.");
+            Debug.Log("[CoreManager] End of scene order reached.");
+            PrintAllTaskTimes();
             return;
         }
 
@@ -250,12 +274,8 @@ public class CoreManager : MonoBehaviour
                 SetTask(taskNum);
         }
 
-        if (nextScene == "End")
-        {
-            PrintAllTaskTimes();
-        }
 
-        Debug.Log($"[CoreManager] Preparing to load: {nextScene} (Condition={currentCondition}, Task={currentTask})");
+        Debug.Log($"[CoreManager] Preparing to load scene index {_currentIndex - 1}: {nextScene} (Condition={currentCondition}, Task={currentTask})");
 
         StartCoroutine(PreloadAndActivateScene(nextScene));
     }
@@ -265,21 +285,25 @@ public class CoreManager : MonoBehaviour
     private IEnumerator PreloadAndActivateScene(string nextScene)
     {
         _isTransitioning = true;
-        
+
         List<IInteractor> interactors = new List<IInteractor>();
         if (_ovrRig != null)
         {
             interactors = _ovrRig.GetComponentsInChildren<IInteractor>(true).ToList();
             foreach (var interactor in interactors)
             {
-                interactor.Disable();
+                if (interactor != null) interactor.Disable();
             }
+        }
+        else
+        {
+            Debug.LogWarning("[CoreManager] OVR Rig reference not set, cannot disable interactors.");
         }
 
         string actualScene = (nextScene.Contains("PC_Task") || nextScene.Contains("GC_Task"))
             ? "Task" + currentTask
             : nextScene;
-        
+
 
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(actualScene);
         if (asyncLoad != null)
@@ -293,13 +317,21 @@ public class CoreManager : MonoBehaviour
             // Instantly activate the scene when ready
             asyncLoad.allowSceneActivation = true;
 
+            // Wait for activation to complete
             while (!asyncLoad.isDone)
                 yield return null;
         }
-        
+        else
+        {
+            Debug.LogError($"[CoreManager] Failed to start loading scene: {actualScene}");
+        }
+
         foreach (var interactor in interactors)
         {
-            interactor.Enable();
+            if (interactor != null)
+            {
+                interactor.Enable();
+            }
         }
 
         _isTransitioning = false;
@@ -308,5 +340,50 @@ public class CoreManager : MonoBehaviour
 
     public string GetCurrentCondition() => currentCondition;
     public int GetCurrentTask() => currentTask;
+
+    public int GetCurrentSceneIndex() => _currentIndex;
     public Dictionary<string, float> GetTaskDurations() => _taskDurations;
+
+
+    // Participant ID calculation
+    private string CalculateNextParticipantID()
+    {
+        string logFileName = "VR_Questionnaire_Data.json";
+        string filePath = Path.Combine(Application.persistentDataPath, logFileName);
+        int nextParticipantNumber = 1;
+
+        if (File.Exists(filePath))
+        {
+            try
+            {
+                string existingJson = File.ReadAllText(filePath);
+                AllResultsData allResultsData = JsonUtility.FromJson<AllResultsData>(existingJson);
+
+                if (allResultsData != null && allResultsData.LogResponse != null && allResultsData.LogResponse.Count > 0)
+                {
+                    int maxIdNumber = 0;
+                    foreach (var result in allResultsData.LogResponse)
+                    {
+                        if (result.participantID != null && result.participantID.StartsWith("P"))
+                        {
+                            string numberPart = result.participantID.Substring(1);
+                            if (int.TryParse(numberPart, out int idNumber))
+                            {
+                                if (idNumber > maxIdNumber)
+                                {
+                                    maxIdNumber = idNumber;
+                                }
+                            }
+                        }
+                    }
+                    nextParticipantNumber = maxIdNumber + 1;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"[CoreManager] Error reading results file to determine Participant ID: {e.Message}");
+            }
+        }
+        return $"P{nextParticipantNumber:D3}";
+    }
 }

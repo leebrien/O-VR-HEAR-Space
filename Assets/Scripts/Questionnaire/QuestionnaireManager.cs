@@ -2,91 +2,135 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.IO;
 using System;
+using System.Linq;
 
 public class QuestionnaireManager : MonoBehaviour
 {
+    [Header("Questionnaire Files")]
     [SerializeField] private List<TextAsset> questionnaireSequence;
+
+    [Header("References")]
     [SerializeField] private QuestionnaireController questionnaireController;
 
-    private int currentQuestionnaireIndex = 0;
+    private int currentSequenceIndex = 0; // Tracks progress through the questionnaireSequence list
     private string sessionParticipantID;
+
+    // Flags to ensure Cue Preference runs only once per task pair trigger point
+    private bool cuePreferenceDoneAfterIndex3 = false; // Triggered when CoreManager index becomes 4
+    private bool cuePreferenceDoneAfterIndex8 = false; // Triggered when CoreManager index becomes 9
+    private bool cuePreferenceDoneAfterIndex13 = false; // Triggered when CoreManager index becomes 14
 
     void Start()
     {
-        sessionParticipantID = GetNextParticipantID();
-        Debug.Log($"Starting session for Participant ID: {sessionParticipantID}");
+        // Get Participant ID from CoreManager
+        if (CoreManager.Instance != null)
+        {
+            sessionParticipantID = CoreManager.Instance.GetSessionParticipantID();
+            Debug.Log($"[QuestionnaireManager] Using Participant ID: {sessionParticipantID}");
+        }
+        else
+        {
+            Debug.LogError("[QuestionnaireManager] CoreManager instance not found! Cannot get Participant ID.");
+            sessionParticipantID = "P_ERROR"; // Fallback ID
+        }
 
         QuestionnaireController.OnQuestionnaireCompleted += HandleQuestionnaireCompleted;
-        StartNextQuestionnaire();
+
+        if (questionnaireController != null)
+        {
+            StartNextQuestionnaire();
+        }
+        else
+        {
+            Debug.LogError("[QuestionnaireManager] QuestionnaireController not assigned in Inspector!");
+        }
     }
 
     private void OnDestroy()
     {
-        QuestionnaireController.OnQuestionnaireCompleted -= HandleQuestionnaireCompleted;
+
+            QuestionnaireController.OnQuestionnaireCompleted -= HandleQuestionnaireCompleted;
+       
     }
 
     private void StartNextQuestionnaire()
     {
-        if (currentQuestionnaireIndex < questionnaireSequence.Count)
+        if (currentSequenceIndex >= questionnaireSequence.Count)
         {
-            //Debug.Log($" Starting Questionnaire {currentQuestionnaireIndex + 1}");
-            TextAsset nextFile = questionnaireSequence[currentQuestionnaireIndex];
-            questionnaireController.StartQuestionnaire(nextFile, sessionParticipantID);
+            Debug.Log($"[QuestionnaireManager] Reached end of questionnaire sequence for {sessionParticipantID}. Loading next scene via CoreManager.");
+            ProceedToNextCoreScene();
+            return;
+        }
+
+        TextAsset nextFile = questionnaireSequence[currentSequenceIndex];
+        if (nextFile.name == "cp")
+        {
+            int coreManagerCurrentIndex = -1;
+            if (CoreManager.Instance != null)
+            {
+                coreManagerCurrentIndex = CoreManager.Instance.GetCurrentSceneIndex();
+            }
+            else
+            {
+                Debug.LogError("[QuestionnaireManager] CoreManager instance not found! Cannot check index for CP.");
+                //currentSequenceIndex++;
+                StartNextQuestionnaire();
+                return;
+            }
+
+            // Determine if it's the RIGHT TIME to show cuePreference
+            bool runCpNow = false;
+            if (coreManagerCurrentIndex == 4 && !cuePreferenceDoneAfterIndex3)
+            {
+                runCpNow = true;
+                cuePreferenceDoneAfterIndex3 = true;
+            }
+            else if (coreManagerCurrentIndex == 9 && !cuePreferenceDoneAfterIndex8)
+            {
+                runCpNow = true;
+                cuePreferenceDoneAfterIndex8 = true;
+            }
+            else if (coreManagerCurrentIndex == 14 && !cuePreferenceDoneAfterIndex13)
+            {
+                runCpNow = true;
+                cuePreferenceDoneAfterIndex13 = true;
+            }
+
+            if (runCpNow)
+            {
+                Debug.Log($"[QuestionnaireManager] Triggering Cue Preference (CP.json) found at sequence index {currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}.");
+                questionnaireController.StartQuestionnaire(nextFile, sessionParticipantID);
+            }
+            else
+            {
+                Debug.Log($"[QuestionnaireManager] Skipping Cue Preference (CP.json) found at sequence index {currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}. Required index 4/9/14 or already done.");
+                currentSequenceIndex++; 
+                StartNextQuestionnaire(); 
+                return;
+            }
         }
         else
         {
-            //Debug.Log("There are no more questionnaires.");
+            questionnaireController.StartQuestionnaire(nextFile, sessionParticipantID);
         }
     }
 
     private void HandleQuestionnaireCompleted()
     {
-        //Debug.Log("Questionnaire Completed");
-        currentQuestionnaireIndex++;
+        currentSequenceIndex++;
         StartNextQuestionnaire();
     }
 
-    private string GetNextParticipantID()
+    // Helper function to call CoreManager's LoadNextScene safely
+    private void ProceedToNextCoreScene()
     {
-        string logFileName = "VR_Questionnaire_Data.json"; // Make sure this matches the model
-        string filePath = Path.Combine(Application.persistentDataPath, logFileName);
-        int nextParticipantNumber = 1;
-
-        if (File.Exists(filePath))
+        if (CoreManager.Instance != null)
         {
-            try
-            {
-                string existingJson = File.ReadAllText(filePath);
-                AllResultsData allResultsData = JsonUtility.FromJson<AllResultsData>(existingJson);
-
-                if (allResultsData != null && allResultsData.LogResponse != null && allResultsData.LogResponse.Count > 0)
-                {
-                    int maxIdNumber = 0;
-                    foreach (var result in allResultsData.LogResponse)
-                    {
-                        if (result.participantID != null && result.participantID.StartsWith("P"))
-                        {
-                            string numberPart = result.participantID.Substring(1);
-                            if (int.TryParse(numberPart, out int idNumber))
-                            {
-                                if (idNumber > maxIdNumber)
-                                {
-                                    maxIdNumber = idNumber;
-                                }
-                            }
-                        }
-                    }
-                    nextParticipantNumber = maxIdNumber + 1;
-                }
-            }
-            catch (Exception e)
-            {
-                Debug.LogError($"Error reading results file to determine Participant ID: {e.Message}");
-                // Proceed with P001 in case of error
-            }
+            CoreManager.Instance.LoadNextScene();
         }
-        // Format as P001, P002, etc.
-        return $"P{nextParticipantNumber:D3}";
+        else
+        {
+            Debug.LogError("[QuestionnaireManager] CoreManager not found, cannot proceed to next scene automatically.");
+        }
     }
-
 }

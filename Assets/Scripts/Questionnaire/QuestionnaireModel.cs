@@ -3,72 +3,16 @@ using System.Collections.Generic;
 using System;
 using System.IO;
 
-[Serializable]
-public class QuestionData
-{
-    // Common fields
-    public string id;
-    public string type;
-    public string text;
-    public string lowLabel;
-    public string highLabel;
-
-    // Slider-specific fields
-    public float minValue;
-    public float maxValue;
-
-    // Radio-specific field
-    public int steps;
-}
-
-[Serializable]
-public class QuestionnaireData
-{
-    public string questionnaireName;
-    public List<QuestionData> questions;
-}
-
-[Serializable]
-public class ResponseItem
-{
-    public string id;
-    public float score; 
-
-    public ResponseItem(string id, float score)
-    {
-        this.id = id;
-        this.score = score;
-    }
-}
-
-[Serializable]
-public class QuestionnaireResult
-{
-    public string participantID;
-    public string questionnaireName;
-    public string timestamp;
-    public List<ResponseItem> responses;
-}
-
-[Serializable]
-public class AllResultsData
-{
-    public List<QuestionnaireResult> LogResponse;
-
-    public AllResultsData()
-    {
-        LogResponse = new List<QuestionnaireResult>();
-    }
-}
-
-// Main Model
 
 public class QuestionnaireModel : MonoBehaviour
 {
-    public TextAsset jsonFile;
+    // Keep public if might assign for testing, otherwise make private
+    // public TextAsset jsonFile;
+    [SerializeField] private TextAsset jsonFile;
 
     private QuestionnaireData data;
     public int currentQuestionIndex { get; private set; }
+    // Using float for numeric scores
     public Dictionary<string, float> sessionResponses = new Dictionary<string, float>();
 
     private string logFileName = "VR_Questionnaire_Data.json";
@@ -80,29 +24,30 @@ public class QuestionnaireModel : MonoBehaviour
         currentQuestionIndex = 0;
         sessionResponses.Clear();
 
-        if (jsonFile != null)
+        if (newJsonFile != null) 
         {
             try
             {
-                data = JsonUtility.FromJson<QuestionnaireData>(jsonFile.text);
+                data = JsonUtility.FromJson<QuestionnaireData>(newJsonFile.text);
                 if (data == null || data.questions == null)
                 {
                     data = new QuestionnaireData { questions = new List<QuestionData>() };
-                    Debug.LogError("JSON Data is empty or questions list is missing/null.");
+                    Debug.LogError($"[QuestionnaireModel] JSON Data in '{newJsonFile.name}' is empty or questions list is missing/null.");
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to deserialize JSON in {jsonFile.name}: {e.Message}");
+                Debug.LogError($"[QuestionnaireModel] Failed to deserialize JSON in {newJsonFile.name}: {e.Message}");
                 data = new QuestionnaireData { questions = new List<QuestionData>() };
             }
         }
         else
         {
             data = new QuestionnaireData { questions = new List<QuestionData>() };
-            Debug.LogError("JSON File is null. Cannot initialize model.");
+            Debug.LogError("[QuestionnaireModel] JSON File provided to InitializeWithData is null.");
         }
-        // Debug.Log($"Model Initialized with Questionnaire: {QuestionnaireName}");
+
+        // Debug.Log($"[QuestionnaireModel] Initialized with Questionnaire: {QuestionnaireName}");
     }
 
     public QuestionData GetCurrentQuestion()
@@ -125,16 +70,16 @@ public class QuestionnaireModel : MonoBehaviour
     public void LogResponse(string qID, float score)
     {
         sessionResponses[qID] = score;
-        //Debug.Log($"Logged response for {qID}: {score}");
+        //Debug.Log($"[QuestionnaireModel] Logged response for {qID}: {score}");
     }
 
-    public void SubmitData(string participantID) // <-- Parameter added
+    // Accepts participantID from Controller
+    public void SubmitData(string participantID)
     {
-
         // 1. Create the new result object using the provided ID
         QuestionnaireResult newResult = new QuestionnaireResult
         {
-            participantID = participantID, // Use the ID passed from the controller
+            participantID = participantID,
             questionnaireName = this.QuestionnaireName,
             timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             responses = new List<ResponseItem>()
@@ -156,7 +101,7 @@ public class QuestionnaireModel : MonoBehaviour
             {
                 string existingJson = File.ReadAllText(filePath);
                 allResultsData = JsonUtility.FromJson<AllResultsData>(existingJson);
-                // More robust check for null or empty list
+
                 if (allResultsData == null || allResultsData.LogResponse == null)
                 {
                     allResultsData = new AllResultsData();
@@ -164,7 +109,7 @@ public class QuestionnaireModel : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError($"Error reading existing results file: {e.Message}");
+                Debug.LogError($"[QuestionnaireModel] Error reading existing results file: {e.Message}");
                 allResultsData = new AllResultsData();
             }
         }
@@ -179,13 +124,13 @@ public class QuestionnaireModel : MonoBehaviour
         // 5. Serialize and overwrite the file
         try
         {
-            string jsonToSave = JsonUtility.ToJson(allResultsData, true); // Pretty print enabled
+            string jsonToSave = JsonUtility.ToJson(allResultsData, true);
             File.WriteAllText(filePath, jsonToSave);
-            Debug.Log($"Data for {participantID} saved successfully to: {filePath}");
+            Debug.Log($"[QuestionnaireModel] Data for {participantID} ({QuestionnaireName}) saved successfully to: {filePath}");
         }
         catch (Exception e)
         {
-            Debug.LogError($"Failed to save JSON data: {e.Message}");
+            Debug.LogError($"[QuestionnaireModel] Failed to save JSON data: {e.Message}");
         }
     }
 
