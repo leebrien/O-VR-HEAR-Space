@@ -1,8 +1,9 @@
-
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
+
+
 
 public class CoreManager : MonoBehaviour
 {
@@ -19,26 +20,74 @@ public class CoreManager : MonoBehaviour
     private Dictionary<string, float> _taskDurations;
 
     private bool _isTransitioning;
+    private bool _rigReferencesSet;
 
-    public bool _firstLog = true;
+    public bool firstLog = true;
+
+    private GameObject _ovrRig;
+    private GameObject _ovrHands;
+    private GameObject _ovrControllers;
+    private GameObject _leftXRRayInteractor;
+    private GameObject _rightXRRayInteractor;
+    private GameObject _leftSaber;
+    private GameObject _rightSaber;
+    private Transform _centerEyeAnchor;
+
+    public GameObject GetRig() => _ovrRig;
+    public GameObject GetHands() => _ovrHands;
+    public GameObject GetControllers() => _ovrControllers;
+
+    public GameObject GetLeftXRRayInteractor() => _leftXRRayInteractor;
+    public GameObject GetRightXRRayInteractor() => _rightXRRayInteractor;
+    public GameObject GetLeftSaber() => _leftSaber;
+    public GameObject GetRightSaber() => _rightSaber;
+    public Transform GetCenterEyeAnchor() => _centerEyeAnchor;
+
+    private PracticeSoundManager _soundManager;
+    private TaskInteraction _taskInteraction;
+
+
+    public void SetRigReferences(GameObject rig, GameObject hands, GameObject controllers,
+        GameObject leftXRRayInteractor, GameObject rightXRRayInteractor,
+        GameObject leftSaber, GameObject rightSaber,
+        Transform centerEyeAnchor)
+    {
+        Debug.Log("[CoreManager] Setting rig references." + 
+                  "OVR Rig: " + rig +
+                  ", Hands: " + hands +
+                  ", Controllers: " + controllers +
+                  ", Left XR Ray Interactor: " + leftXRRayInteractor +
+                  ", Right XR Ray Interactor: " + rightXRRayInteractor +
+                  ", Left Saber: " + leftSaber +
+                  ", Right Saber: " + rightSaber +
+                  ", Center Eye Anchor: " + centerEyeAnchor);
+        
+        _ovrRig = rig;
+        _ovrHands = hands;
+        _ovrControllers = controllers;
+        _leftXRRayInteractor = leftXRRayInteractor;
+        _rightXRRayInteractor = rightXRRayInteractor;
+        _leftSaber = leftSaber;
+        _rightSaber = rightSaber;
+        _centerEyeAnchor = centerEyeAnchor;
+        _rigReferencesSet = true;
+    }
 
     private void Start()
     {
-        if (_firstLog)
-        {
-            SceneManager.LoadScene("PracticeScene");
-        }
-        
+        SceneManager.LoadScene(firstLog ? "PracticeScene" : "LobbyScene");
     }
+
 
     public void SetFirstLog(bool value)
     {
-        _firstLog = value;
+        firstLog = value;
     }
     
+
     public bool GetFirstLog()
     {
-        return _firstLog;
+        return firstLog;
 
     }
 
@@ -49,11 +98,52 @@ public class CoreManager : MonoBehaviour
             Instance = this;
             DontDestroyOnLoad(gameObject);
             _taskDurations = new Dictionary<string, float>();
+            SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
             Destroy(gameObject);
         }
+    }
+    private void OnDestroy()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name == "PracticeScene" || scene.name == "Task1")
+            StartCoroutine(LinkDependenciesWhenReady());
+    }
+
+    // ReSharper disable Unity.PerformanceAnalysis
+    private IEnumerator LinkDependenciesWhenReady()
+    {
+        // Wait until the rig references have been set by the initializer script.
+        yield return new WaitUntil(() => _rigReferencesSet);
+        LinkDependenciesImmediate();
+    }
+
+
+    private void LinkDependenciesImmediate()
+    {
+        var active = SceneManager.GetActiveScene().name;
+
+        if (active.Contains("Practice"))
+        {
+            Debug.Log("[Dependency] In practice scene, linking sound manager to sabers." + SceneManager.GetActiveScene().name);
+            _soundManager = FindFirstObjectByType<PracticeSoundManager>();
+            _leftSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>().UpdateSceneReferences(_soundManager, null);
+            _rightSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>().UpdateSceneReferences(_soundManager, null);
+        }
+        else if (active.Contains("Task"))
+        {
+            Debug.Log("[Dependency] In Task scene, linking sound TaskInteraction to sabers." + SceneManager.GetActiveScene().name);
+            _taskInteraction = FindFirstObjectByType<TaskInteraction>();
+            _leftSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>().UpdateSceneReferences(null, _taskInteraction);
+            _rightSaber.transform.GetChild(0).gameObject.GetComponent<SaberBlade>().UpdateSceneReferences(null, _taskInteraction);
+        }
+
     }
 
     private void SetCondition(string condition) => currentCondition = condition;
@@ -169,6 +259,8 @@ public class CoreManager : MonoBehaviour
         StartCoroutine(PreloadAndActivateScene(nextScene));
     }
 
+
+
     private IEnumerator PreloadAndActivateScene(string nextScene)
     {
         _isTransitioning = true;
@@ -176,19 +268,24 @@ public class CoreManager : MonoBehaviour
         string actualScene = (nextScene.Contains("PC_Task") || nextScene.Contains("GC_Task"))
             ? "Task" + currentTask
             : nextScene;
+        
 
         AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(actualScene);
-        asyncLoad.allowSceneActivation = false;
+        if (asyncLoad != null)
+        {
+            asyncLoad.allowSceneActivation = false;
 
-        // Wait until the scene is almost loaded
-        while (asyncLoad.progress < 0.9f)
-            yield return null;
+            // Wait until the scene is almost loaded
+            while (asyncLoad.progress < 0.9f)
+                yield return null;
 
-        // Instantly activate the scene when ready
-        asyncLoad.allowSceneActivation = true;
 
-        while (!asyncLoad.isDone)
-            yield return null;
+            // Instantly activate the scene when ready
+            asyncLoad.allowSceneActivation = true;
+
+            while (!asyncLoad.isDone)
+                yield return null;
+        }
 
         _isTransitioning = false;
     }

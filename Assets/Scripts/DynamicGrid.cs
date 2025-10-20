@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 [ExecuteAlways]
@@ -5,15 +6,24 @@ public class DynamicGrid : MonoBehaviour
 {
     private static readonly int CenterPos = Shader.PropertyToID("_CenterPos");
     public Material gridMaterial;
-    public Transform target; 
-    public float yOffset = 0f; 
+    private Transform _target; 
+    public float yOffset = 0f;
+
+    private void Start()
+    {
+        if (_target == null && CoreManager.Instance != null)
+        {
+            _target = CoreManager.Instance.GetCenterEyeAnchor();
+        }
+    }
 
     void Update()
     {
-        if (gridMaterial is null || target is null)
+        if (!Application.isPlaying) return;
+        if (gridMaterial is null || _target is null)
             return;
 
-        Vector3 pos = target.position;
+        Vector3 pos = _target.position;
         pos.y = yOffset; // keep it flat on ground
         gridMaterial.SetVector(CenterPos, new Vector4(pos.x, pos.y, pos.z, 0));
     }

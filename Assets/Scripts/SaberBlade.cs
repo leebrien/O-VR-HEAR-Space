@@ -1,39 +1,59 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SaberBlade : MonoBehaviour
 {
     public string targetTag = "CueSource";
     public Material greenMaterial;
     public OVRInput.Controller controller; // Left or Right controller
-    public TaskInteraction taskInteraction; // Must have OnSuccess() and SetMeshMaterial(Material)
-    public PracticeSoundManager practiceSoundManager;
+    private TaskInteraction _taskInteraction; // Must have OnSuccess() and SetMeshMaterial(Material)
+    private PracticeSoundManager _practiceSoundManager;
     public LayerMask targetLayer;
 
     private bool _isColliding = false;
-    private string _sceneName;
+    
+    private void OnEnable()
+        {
+            // Reset the collision state to ensure we start fresh in each new scene.
+            _isColliding = false;
+            Debug.Log("[SaberBlade] OnEnable: Collision state has been reset.");
+        }
+    
 
-    void Start()
+    public void UpdateSceneReferences(PracticeSoundManager practiceSoundManager, TaskInteraction taskInteraction)
     {
-        _sceneName = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+        Debug.Log("UpdateSceneReferences on " + SceneManager.GetActiveScene().name + " with practiceSoundManager: " 
+                  + practiceSoundManager + " and taskInteraction: " + taskInteraction);
+        _practiceSoundManager = practiceSoundManager;
+        _taskInteraction = taskInteraction;
+        
     }
 
-    void Update()
+    private void Update()
     {
         bool isTriggerPressed = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, controller) > 0.1f;
+        
+        if (isTriggerPressed)
+        {
+            Debug.Log("SaberBlade triggered");
+        }
 
         // ONE-SHOT logic
         if (_isColliding && isTriggerPressed)
         {
-            if (taskInteraction)
+            Debug.Log("Successful Trigger");
+            Debug.Log("TaskInteraction is " + (_taskInteraction != null ? "notnull" : "null"));
+            Debug.Log("PracticeSoundManager is " + (_practiceSoundManager != null ? "notnull" : "null"));
+            if (_taskInteraction != null)
             {
-                taskInteraction.OnSuccess();
-                taskInteraction.SetMeshMaterial(greenMaterial);
-            } else if (_sceneName.Contains("Practice"))
+                _taskInteraction.OnSuccess();
+            } else if (_practiceSoundManager != null)
             {
-                practiceSoundManager.OnSuccess(greenMaterial);
+                _practiceSoundManager.OnSuccess(greenMaterial);
             }
         }
     }
+    
 
     private void OnTriggerEnter(Collider other)
     {

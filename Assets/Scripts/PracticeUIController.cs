@@ -28,14 +28,14 @@ public class PracticeUIManagement : MonoBehaviour
             tutorialPanelGuide.SetActive(true);
         }
         
-        if (tutorialPanelGuide)
+        if (tutorialPanelGuide != null)
         {
             var titleObj = tutorialPanelGuide.transform.Find("tutorialInstructionTitle");
             if (titleObj)
                 _instructionTutorial = titleObj.GetComponent<TextMeshProUGUI>();
         }
 
-        if (welcomeScreenLayout)
+        if (welcomeScreenLayout!=null)
         {
             var titleObj = welcomeScreenLayout.transform.Find("welcomeInstructionTitle");
             if (titleObj)
