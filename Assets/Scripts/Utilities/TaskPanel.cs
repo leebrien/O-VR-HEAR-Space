@@ -17,19 +17,17 @@ public class TaskPanel : MonoBehaviour
     private TrackingSwitcher _trackingSwitcher;
     private SaberManager _saberManager;
 
-    private void Awake()
+    private void Start()
     {
-       
         string currentCondition = CoreManager.Instance.currentCondition;
         int currentTask = CoreManager.Instance.currentTask;
-        if (interactionStatusText) interactionStatusText.gameObject.SetActive(false);
+        if (interactionStatusText != null) interactionStatusText.gameObject.SetActive(false);
         if (currentTask == 1)
         {
             _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
             _saberManager = FindFirstObjectByType<SaberManager>();
-           
         }
-        
+
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Task"))
         {
             var taskType = currentTask switch
@@ -44,14 +42,12 @@ public class TaskPanel : MonoBehaviour
             {
                 "PC" => "Personalized Cue",
                 "GC" => "Generic Cue",
-                _  => "Unknown Cue"
+                _ => "Unknown Cue"
             };
-                
-            displayText.text = $"TASK {currentTask}: {taskType} ({cueType})";
 
-            
+            displayText.text = $"TASK {currentTask}: {taskType} ({cueType})";
         }
-        panelTextsHolder.SetActive(true);
+        if (panelTextsHolder != null) panelTextsHolder.SetActive(true);
     }
 
     public void OnStartButtonClicked()
@@ -86,7 +82,7 @@ public class TaskPanel : MonoBehaviour
     {
         float currentTime = TimerDuration;
 
-        if (counterTextHolder)
+        if (counterTextHolder!=null)
         {
             counterTitleHolder.gameObject.SetActive(true);
             displayText.gameObject.SetActive(false);
@@ -100,24 +96,23 @@ public class TaskPanel : MonoBehaviour
         }
 
         counterTextHolder.text = "0";
-        if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher != null)
+        if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher != null && _saberManager != null)
         {
             _trackingSwitcher.SwitchToControllersOnly();
             _saberManager.EnableSabers();
-            
         }
         yield return new WaitForSeconds(1f);
 
-        if (displayText)
+        if (displayText!=null)
         {
             counterTitleHolder.gameObject.SetActive(false);
             counterTextHolder.gameObject.SetActive(false);
         }
-        if (panelToHide)
+        if (panelToHide!=null)
         {
             panelToHide.SetActive(false);
 
-            if (SoundManager.Instance )
+            if (SoundManager.Instance)
             {
                 SoundManager.Instance.PlaySound();
                 CoreManager.Instance.StartCurrentTaskTime();

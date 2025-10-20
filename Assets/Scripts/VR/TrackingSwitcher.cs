@@ -2,24 +2,31 @@ using UnityEngine;
 
 public class TrackingSwitcher : MonoBehaviour
 {
-    public GameObject ovrHands;
-    public GameObject ovrControllers;
+    private GameObject _ovrHands;
+    private GameObject _ovrControllers;
+
+    private void Awake()
+    {
+        _ovrHands = CoreManager.Instance.GetHands();
+        _ovrControllers = CoreManager.Instance.GetControllers();
+        
+    }
 
     public void SwitchToHandsOnly()
     {
-        ovrHands.SetActive(true);
-        ovrControllers.SetActive(false);
+        _ovrHands.SetActive(true);
+        _ovrControllers.SetActive(false);
     }
 
     public void SwitchToControllersOnly()
     {
-        ovrHands.SetActive(false);
-        ovrControllers.SetActive(true);
+        _ovrHands.SetActive(false);
+        _ovrControllers.SetActive(true);
     }
 
     public void SwitchToBoth()
     {
-        ovrHands.SetActive(true);
-        ovrControllers.SetActive(true);
+        _ovrHands.SetActive(true);
+        _ovrControllers.SetActive(true);
     }
 }

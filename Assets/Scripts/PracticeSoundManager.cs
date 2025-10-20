@@ -6,7 +6,7 @@ using Random = UnityEngine.Random;
 
 public class PracticeSoundManager : MonoBehaviour
 {
-    public Transform user; // Assign to center eye anchor
+    private Transform _user; // Assign to center eye anchor
 
     public GameObject pointingObject; // Object for pointing
     public GameObject grabbingObject; // Object for grabbing
@@ -30,8 +30,9 @@ public class PracticeSoundManager : MonoBehaviour
         {
            
         }
-        if (pointingObject) _pointingRenderer = pointingObject.GetComponent<Renderer>();
-        if (grabbingObject) _grabbingRenderer = grabbingObject.GetComponent<Renderer>();
+        if (pointingObject!=null) _pointingRenderer = pointingObject.GetComponent<Renderer>();
+        if (grabbingObject!=null) _grabbingRenderer = grabbingObject.GetComponent<Renderer>();
+        _user = CoreManager.Instance.GetCenterEyeAnchor();
     }
 
     public TrackingSwitcher GetTrackingSwitcher()
@@ -41,8 +42,9 @@ public class PracticeSoundManager : MonoBehaviour
 
     public void PlayObject(int taskType)
     {
-        pointingObject?.SetActive(false);
-        grabbingObject?.SetActive(false);
+        if (pointingObject != null) pointingObject.SetActive(false);
+
+        if (grabbingObject != null) grabbingObject.SetActive(false);
 
         GameObject activeObject;
         if (taskType == 1)
@@ -63,13 +65,13 @@ public class PracticeSoundManager : MonoBehaviour
             return;
         }
 
-        if (user == null || activeObject == null)
+        if (_user == null || activeObject == null)
         {
             Debug.LogWarning("Required components not assigned in the Inspector.");
             return;
         }
 
-        Vector3 objectPosition = user.position;
+        Vector3 objectPosition = _user.position;
         GenerateObjectPosition(ref objectPosition, taskType);
 
         activeObject.transform.position = objectPosition;
@@ -114,7 +116,7 @@ public class PracticeSoundManager : MonoBehaviour
             }
         }
 
-        objectPos.y = Random.Range(1, user.position.y + 0.3f);
+        objectPos.y = Random.Range(1, _user.position.y + 0.3f);
         objectPos.x = Mathf.Clamp(objectPos.x, -_roomSize.x / 2, _roomSize.x / 2);
         objectPos.z = Mathf.Clamp(objectPos.z, -_roomSize.z / 2, _roomSize.z / 2);
     }
@@ -128,7 +130,7 @@ public class PracticeSoundManager : MonoBehaviour
             saberManager.DisableSabers();
             trackingSwitcher.SwitchToHandsOnly();
         }
-        StartCoroutine(CompleteTaskAfterDelay(0.8f));
+        StartCoroutine(CompleteTaskAfterDelay(1f));
     }
 
     // delay before compeletion

@@ -1,15 +1,12 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Oculus.Interaction;
-using TMPro;
 using Random = UnityEngine.Random;
 
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance;
-    public Transform user; //User reference, eye anchor center
+    private Transform _user; //User reference, eye anchor center
     public GameObject audioObject; // Direct reference to the object in the hierarchy
     public AudioClip genericCue;
     public AudioClip hearsonaCue;
@@ -17,6 +14,8 @@ public class SoundManager : MonoBehaviour
 
     private AudioSource _audioSource;
     public Vector3 _soundPosition;
+    
+    private Coroutine _playCoroutine;
 
     private void Awake()
     {
@@ -40,7 +39,13 @@ public class SoundManager : MonoBehaviour
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        user = GameObject.FindGameObjectWithTag("MainCamera")?.transform;
+        if (CoreManager.Instance == null)
+        {
+            Debug.LogError("CoreManager.Instance is null. Cannot initialize SoundManager.");
+            return;
+        }
+        
+        _user = CoreManager.Instance.GetCenterEyeAnchor();
         audioObject = GameObject.FindGameObjectWithTag("CueSource");
         
         if (audioObject != null) 
@@ -52,7 +57,7 @@ public class SoundManager : MonoBehaviour
 
     public void PlaySound()
     {
-        if (user == null || genericCue == null || audioObject == null || hearsonaCue == null)
+        if (_user == null || genericCue == null || audioObject == null || hearsonaCue == null)
         {
             Debug.LogWarning("User, soundClip, or audioObject not assigned!");
             return;
@@ -63,12 +68,19 @@ public class SoundManager : MonoBehaviour
             _audioSource.Stop();
         }
 
-        _soundPosition = user.position;
+        _soundPosition = _user.position;
         GenerateSoundPosition(ref _soundPosition);
 
         // Position the existing audio object
         audioObject.transform.position = _soundPosition;
         audioObject.SetActive(true);
+        
+        
+        if (CoreManager.Instance == null)
+        {
+            Debug.LogWarning("CoreManager.Instance is null. Cannot determine condition.");
+            return;
+        }
 
         string currentCondition = CoreManager.Instance.currentCondition;
         Debug.Log("Current Condition is: " + currentCondition);
@@ -95,17 +107,28 @@ public class SoundManager : MonoBehaviour
             _audioSource.Stop();
             _audioSource.enabled = false;
         }
-        //audioObject.SetActive(false);
+
+        // Add this
+        if (_playCoroutine != null)
+        {
+            StopCoroutine(_playCoroutine);
+            _playCoroutine = null;
+        }
     }
 
     private void InitializeSoundSource(AudioClip clip)
     {
+        if (_playCoroutine != null)
+        {
+            StopCoroutine(_playCoroutine);
+        }
+        
         _audioSource.clip = clip;
         _audioSource.spatialBlend = 1.0f;
         _audioSource.playOnAwake = false;
         _audioSource.loop = false;
 
-        StartCoroutine(PlayWithDelay(1.5f));
+        _playCoroutine = StartCoroutine(PlayWithDelay(1.5f));
     }
 
     private IEnumerator PlayWithDelay(float delay)
@@ -119,6 +142,12 @@ public class SoundManager : MonoBehaviour
 
     private void GenerateSoundPosition(ref Vector3 soundPos)
     {
+        if (CoreManager.Instance == null)
+        {
+            Debug.LogWarning("CoreManager.Instance is null. Cannot get current task.");
+            return; 
+        }
+        
         int currentTask = CoreManager.Instance.currentTask;
         Debug.Log("Current Task is: " + currentTask);
         DirectionGeneratorPerTask(ref soundPos, currentTask);
@@ -150,7 +179,7 @@ public class SoundManager : MonoBehaviour
                 case 7: soundPos.z -= offset; soundPos.x -= offset; break;
             }
         }
-        soundPos.y = Random.Range(1, user.position.y + 0.3f);
+        soundPos.y = Random.Range(1, _user.position.y + 0.3f);
         soundPos.x = Mathf.Clamp(soundPos.x, -_roomSize.x / 2, _roomSize.x / 2);
         soundPos.z = Mathf.Clamp(soundPos.z, -_roomSize.z / 2, _roomSize.z / 2);
     }
