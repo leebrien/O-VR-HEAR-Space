@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
-
+using System.Linq;
+using Oculus.Interaction;
 
 
 public class CoreManager : MonoBehaviour
@@ -264,6 +265,16 @@ public class CoreManager : MonoBehaviour
     private IEnumerator PreloadAndActivateScene(string nextScene)
     {
         _isTransitioning = true;
+        
+        List<IInteractor> interactors = new List<IInteractor>();
+        if (_ovrRig != null)
+        {
+            interactors = _ovrRig.GetComponentsInChildren<IInteractor>(true).ToList();
+            foreach (var interactor in interactors)
+            {
+                interactor.Disable();
+            }
+        }
 
         string actualScene = (nextScene.Contains("PC_Task") || nextScene.Contains("GC_Task"))
             ? "Task" + currentTask
@@ -279,12 +290,16 @@ public class CoreManager : MonoBehaviour
             while (asyncLoad.progress < 0.9f)
                 yield return null;
 
-
             // Instantly activate the scene when ready
             asyncLoad.allowSceneActivation = true;
 
             while (!asyncLoad.isDone)
                 yield return null;
+        }
+        
+        foreach (var interactor in interactors)
+        {
+            interactor.Enable();
         }
 
         _isTransitioning = false;

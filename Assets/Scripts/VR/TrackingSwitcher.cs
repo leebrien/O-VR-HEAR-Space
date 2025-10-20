@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class TrackingSwitcher : MonoBehaviour
 {
@@ -10,6 +11,14 @@ public class TrackingSwitcher : MonoBehaviour
         _ovrHands = CoreManager.Instance.GetHands();
         _ovrControllers = CoreManager.Instance.GetControllers();
         
+    }
+
+    private void Start()
+    {
+        if (SceneManager.GetActiveScene().name.Contains("Questionnaire"))
+        {
+            SwitchToBoth();
+        }
     }
 
     public void SwitchToHandsOnly()
