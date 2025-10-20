@@ -28,14 +28,11 @@ public class QuestionnaireData
     public List<QuestionData> questions;
 }
 
-
-// Json structure for saving
-
 [Serializable]
 public class ResponseItem
 {
     public string id;
-    public float score;
+    public float score; 
 
     public ResponseItem(string id, float score)
     {
@@ -56,7 +53,6 @@ public class QuestionnaireResult
 [Serializable]
 public class AllResultsData
 {
-    // A top-level object to hold a list of all results
     public List<QuestionnaireResult> LogResponse;
 
     public AllResultsData()
@@ -64,6 +60,8 @@ public class AllResultsData
         LogResponse = new List<QuestionnaireResult>();
     }
 }
+
+// Main Model
 
 public class QuestionnaireModel : MonoBehaviour
 {
@@ -75,13 +73,6 @@ public class QuestionnaireModel : MonoBehaviour
 
     private string logFileName = "VR_Questionnaire_Data.json";
 
-    void Awake()
-    {
-        if (jsonFile != null)
-        {
-            InitializeWithData(jsonFile);
-        }
-    }
 
     public void InitializeWithData(TextAsset newJsonFile)
     {
@@ -111,6 +102,7 @@ public class QuestionnaireModel : MonoBehaviour
             data = new QuestionnaireData { questions = new List<QuestionData>() };
             Debug.LogError("JSON File is null. Cannot initialize model.");
         }
+        // Debug.Log($"Model Initialized with Questionnaire: {QuestionnaireName}");
     }
 
     public QuestionData GetCurrentQuestion()
@@ -133,62 +125,63 @@ public class QuestionnaireModel : MonoBehaviour
     public void LogResponse(string qID, float score)
     {
         sessionResponses[qID] = score;
-        Debug.Log($"Logged response for {qID}: {score}");
+        //Debug.Log($"Logged response for {qID}: {score}");
     }
 
-    public void SubmitData()
+    public void SubmitData(string participantID) // <-- Parameter added
     {
-        // 1. Create a new result object for the questionnaire just completed
+
+        // 1. Create the new result object using the provided ID
         QuestionnaireResult newResult = new QuestionnaireResult
         {
-            participantID = "P001", // This should be made dynamic later
+            participantID = participantID, // Use the ID passed from the controller
             questionnaireName = this.QuestionnaireName,
             timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             responses = new List<ResponseItem>()
         };
 
-        // 2. Convert the sessionResponses dictionary to the ResponseItem list
-        //    (JsonUtility can't serialize dictionaries directly)
+        // 2. Convert sessionResponses dictionary
         foreach (var response in sessionResponses)
         {
             newResult.responses.Add(new ResponseItem(response.Key, response.Value));
         }
 
-        // 3. Load the existing results file (if it exists)
+        // 3. Load existing results file (if it exists)
         string filePath = Path.Combine(Application.persistentDataPath, logFileName);
-        AllResultsData LogResponse;
+        AllResultsData allResultsData;
 
         if (File.Exists(filePath))
         {
             try
             {
                 string existingJson = File.ReadAllText(filePath);
-                LogResponse = JsonUtility.FromJson<AllResultsData>(existingJson);
-                if (LogResponse == null) // Handle empty or corrupted file
+                allResultsData = JsonUtility.FromJson<AllResultsData>(existingJson);
+                // More robust check for null or empty list
+                if (allResultsData == null || allResultsData.LogResponse == null)
                 {
-                    LogResponse = new AllResultsData();
+                    allResultsData = new AllResultsData();
                 }
             }
             catch (Exception e)
             {
                 Debug.LogError($"Error reading existing results file: {e.Message}");
-                LogResponse = new AllResultsData();
+                allResultsData = new AllResultsData();
             }
         }
         else
         {
-            LogResponse = new AllResultsData();
+            allResultsData = new AllResultsData();
         }
 
         // 4. Add the new result to the list
-        LogResponse.LogResponse.Add(newResult);
+        allResultsData.LogResponse.Add(newResult);
 
-        // 5. Serialize the entire collection and overwrite the file
+        // 5. Serialize and overwrite the file
         try
         {
-            string jsonToSave = JsonUtility.ToJson(LogResponse, true);
+            string jsonToSave = JsonUtility.ToJson(allResultsData, true); // Pretty print enabled
             File.WriteAllText(filePath, jsonToSave);
-            Debug.Log($"Data saved successfully to: {filePath}");
+            Debug.Log($"Data for {participantID} saved successfully to: {filePath}");
         }
         catch (Exception e)
         {
