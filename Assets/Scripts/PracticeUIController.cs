@@ -198,24 +198,12 @@ public class PracticeUIManagement : MonoBehaviour
         }
     }
 
-
     public void OnHomeButtonClick()
     {
         SceneManager.LoadScene("LobbyScene");
     }
 
-
-    public void OnStartButtonClick()
-    {
-        // Hide the main lobby panel to start the task
-        tutorialPanel.SetActive(false);
-
-        // Use the stored task type to generate the object
-        if (practiceSoundManager != null)
-        {
-            practiceSoundManager.PlayObject(currentTaskType);
-        }
-    }
+    
     // ReSharper disable Unity.PerformanceAnalysis
     public void OnTaskComplete()
     {
