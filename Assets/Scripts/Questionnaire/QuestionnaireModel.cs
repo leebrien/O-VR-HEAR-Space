@@ -15,7 +15,7 @@ public class QuestionnaireModel : MonoBehaviour
     // Using float for numeric scores
     public Dictionary<string, float> sessionResponses = new Dictionary<string, float>();
 
-    private string logFileName = "VR_Questionnaire_Data.json";
+    private const string LOGFileName = "VR_Questionnaire_Data.json";
 
 
     public void InitializeWithData(TextAsset newJsonFile)
@@ -74,25 +74,21 @@ public class QuestionnaireModel : MonoBehaviour
     }
 
     // Accepts participantID from Controller
-    public void SubmitData(string participantID)
+    public void SubmitData(string participantID, string conditionName, int taskNumber)
     {
-        // 1. Create the new result object using the provided ID
         QuestionnaireResult newResult = new QuestionnaireResult
         {
-            participantID = participantID,
             questionnaireName = this.QuestionnaireName,
             timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             responses = new List<ResponseItem>()
         };
-
-        // 2. Convert sessionResponses dictionary
+        
         foreach (var response in sessionResponses)
         {
             newResult.responses.Add(new ResponseItem(response.Key, response.Value));
         }
-
-        // 3. Load existing results file (if it exists)
-        string filePath = Path.Combine(Application.persistentDataPath, logFileName);
+        
+        string filePath = Path.Combine(Application.persistentDataPath, LOGFileName);
         AllResultsData allResultsData;
 
         if (File.Exists(filePath))
@@ -101,15 +97,12 @@ public class QuestionnaireModel : MonoBehaviour
             {
                 string existingJson = File.ReadAllText(filePath);
                 allResultsData = JsonUtility.FromJson<AllResultsData>(existingJson);
-
-                if (allResultsData == null || allResultsData.LogResponse == null)
-                {
+                if (allResultsData == null || allResultsData.participants == null)
                     allResultsData = new AllResultsData();
-                }
             }
             catch (Exception e)
             {
-                Debug.LogError($"[QuestionnaireModel] Error reading existing results file: {e.Message}");
+                Debug.LogError($"[QuestionnaireModel] Failed to read file: {e.Message}");
                 allResultsData = new AllResultsData();
             }
         }
@@ -117,21 +110,43 @@ public class QuestionnaireModel : MonoBehaviour
         {
             allResultsData = new AllResultsData();
         }
+        
+        ParticipantData participant = allResultsData.participants
+            .Find(p => p.participantID == participantID);
+        
+        if (participant == null)
+        {
+            participant = new ParticipantData { participantID = participantID };
+            allResultsData.participants.Add(participant);
+        }
+        
+        ConditionResult conditionResult = participant.conditionResults
+            .Find(c => c.condition == conditionName && c.taskNumber == taskNumber);
 
-        // 4. Add the new result to the list
-        allResultsData.LogResponse.Add(newResult);
-
-        // 5. Serialize and overwrite the file
+        if (conditionResult == null)
+        {
+            conditionResult = new ConditionResult
+            {
+                condition = conditionName,
+                taskNumber = taskNumber
+            };
+            participant.conditionResults.Add(conditionResult);
+        }
+        
+        conditionResult.questionnaires.Add(newResult);
+        
         try
         {
             string jsonToSave = JsonUtility.ToJson(allResultsData, true);
             File.WriteAllText(filePath, jsonToSave);
-            Debug.Log($"[QuestionnaireModel] Data for {participantID} ({QuestionnaireName}) saved successfully to: {filePath}");
+            Debug.Log($"[QuestionnaireModel] Saved data for {participantID} | {conditionName} | Task {taskNumber} at: {filePath}");
         }
         catch (Exception e)
         {
-            Debug.LogError($"[QuestionnaireModel] Failed to save JSON data: {e.Message}");
+            Debug.LogError($"[QuestionnaireModel] Failed to save JSON: {e.Message}");
         }
+        
+        
     }
 
     public string QuestionnaireName

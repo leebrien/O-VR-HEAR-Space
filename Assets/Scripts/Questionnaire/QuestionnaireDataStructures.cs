@@ -9,30 +9,40 @@ public class ResponseItem
 
     public ResponseItem(string id, float score)
     {
-         this.id = id;
-         this.score = score;
+        this.id = id;
+        this.score = score;
     }
 }
 
 [Serializable]
 public class QuestionnaireResult
 {
-    public string participantID;
     public string questionnaireName;
     public string timestamp;
-    public List<ResponseItem> responses;
+    public List<ResponseItem> responses = new List<ResponseItem>();
+}
+
+[Serializable]
+public class ConditionResult
+{
+    public string condition; // e.g., "Personalized" or "Standard"
+    public int taskNumber;
+    public List<QuestionnaireResult> questionnaires = new List<QuestionnaireResult>();
+}
+
+[Serializable]
+public class ParticipantData
+{
+    public string participantID;
+    public List<ConditionResult> conditionResults = new List<ConditionResult>();
 }
 
 [Serializable]
 public class AllResultsData
 {
-    public List<QuestionnaireResult> LogResponse;
-
-    public AllResultsData()
-    {
-        LogResponse = new List<QuestionnaireResult>();
-    }
+    public List<ParticipantData> participants = new List<ParticipantData>();
 }
+
 
 [Serializable]
 public class QuestionData

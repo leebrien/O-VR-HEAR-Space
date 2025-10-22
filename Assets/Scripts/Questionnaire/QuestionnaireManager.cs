@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System;
 using System.Linq;
+using UnityEngine.SceneManagement;
 
 public class QuestionnaireManager : MonoBehaviour
 {
@@ -12,26 +13,44 @@ public class QuestionnaireManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private QuestionnaireController questionnaireController;
 
-    private int currentSequenceIndex = 0; // Tracks progress through the questionnaireSequence list
-    private string sessionParticipantID;
+    private int _currentSequenceIndex; // Tracks progress through the questionnaireSequence list
+    private string _sessionParticipantID;
+    private string _currentCondition;
+    private int _currentTask;
 
     // Flags to ensure Cue Preference runs only once per task pair trigger point
-    private bool cuePreferenceDoneAfterIndex3 = false; // Triggered when CoreManager index becomes 4
-    private bool cuePreferenceDoneAfterIndex8 = false; // Triggered when CoreManager index becomes 9
-    private bool cuePreferenceDoneAfterIndex13 = false; // Triggered when CoreManager index becomes 14
+    private bool _cuePreferenceDoneAfterIndex3; // Triggered when CoreManager index becomes 4
+    private bool _cuePreferenceDoneAfterIndex8; // Triggered when CoreManager index becomes 9
+    private bool _cuePreferenceDoneAfterIndex13; // Triggered when CoreManager index becomes 14
 
     void Start()
     {
         // Get Participant ID from CoreManager
         if (CoreManager.Instance != null)
         {
-            sessionParticipantID = CoreManager.Instance.GetSessionParticipantID();
-            Debug.Log($"[QuestionnaireManager] Using Participant ID: {sessionParticipantID}");
+            _sessionParticipantID = CoreManager.Instance.GetSessionParticipantID();
+            if (CoreManager.Instance.GetSSQLog() == 0)
+            {
+                _currentCondition = "First SSQ";
+                _currentTask = 0;
+            }
+            else if (CoreManager.Instance.GetSSQLog() == 1)
+            {
+                _currentCondition = "Second SSQ";
+                _currentTask = 0;
+            }
+            else
+            {
+                _currentCondition = CoreManager.Instance.GetCurrentCondition();
+                _currentTask = CoreManager.Instance.GetCurrentTask();
+            }
+
+            Debug.Log($"[QuestionnaireManager] Using Participant ID: {_sessionParticipantID}");
         }
         else
         {
             Debug.LogError("[QuestionnaireManager] CoreManager instance not found! Cannot get Participant ID.");
-            sessionParticipantID = "P_ERROR"; // Fallback ID
+            _sessionParticipantID = "P_ERROR"; // Fallback ID
         }
 
         QuestionnaireController.OnQuestionnaireCompleted += HandleQuestionnaireCompleted;
@@ -55,14 +74,14 @@ public class QuestionnaireManager : MonoBehaviour
 
     private void StartNextQuestionnaire()
     {
-        if (currentSequenceIndex >= questionnaireSequence.Count)
+        if (_currentSequenceIndex >= questionnaireSequence.Count)
         {
-            Debug.Log($"[QuestionnaireManager] Reached end of questionnaire sequence for {sessionParticipantID}. Loading next scene via CoreManager.");
+            Debug.Log($"[QuestionnaireManager] Reached end of questionnaire sequence for {_sessionParticipantID}. Loading next scene via CoreManager.");
             ProceedToNextCoreScene();
             return;
         }
 
-        TextAsset nextFile = questionnaireSequence[currentSequenceIndex];
+        TextAsset nextFile = questionnaireSequence[_currentSequenceIndex];
         if (nextFile.name == "cp")
         {
             int coreManagerCurrentIndex = -1;
@@ -80,51 +99,56 @@ public class QuestionnaireManager : MonoBehaviour
 
             // Determine if it's the RIGHT TIME to show cuePreference
             bool runCpNow = false;
-            if (coreManagerCurrentIndex == 4 && !cuePreferenceDoneAfterIndex3)
+            if (coreManagerCurrentIndex == 4 && !_cuePreferenceDoneAfterIndex3)
             {
                 runCpNow = true;
-                cuePreferenceDoneAfterIndex3 = true;
+                _cuePreferenceDoneAfterIndex3 = true;
             }
-            else if (coreManagerCurrentIndex == 9 && !cuePreferenceDoneAfterIndex8)
+            else if (coreManagerCurrentIndex == 9 && !_cuePreferenceDoneAfterIndex8)
             {
                 runCpNow = true;
-                cuePreferenceDoneAfterIndex8 = true;
+                _cuePreferenceDoneAfterIndex8 = true;
             }
-            else if (coreManagerCurrentIndex == 14 && !cuePreferenceDoneAfterIndex13)
+            else if (coreManagerCurrentIndex == 14 && !_cuePreferenceDoneAfterIndex13)
             {
                 runCpNow = true;
-                cuePreferenceDoneAfterIndex13 = true;
+                _cuePreferenceDoneAfterIndex13 = true;
             }
 
             if (runCpNow)
             {
-                Debug.Log($"[QuestionnaireManager] Triggering Cue Preference (CP.json) found at sequence index {currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}.");
-                questionnaireController.StartQuestionnaire(nextFile, sessionParticipantID);
+                Debug.Log($"[QuestionnaireManager] Triggering Cue Preference (CP.json) found at sequence index {_currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}.");
+                questionnaireController.StartQuestionnaire(nextFile, _sessionParticipantID, _currentCondition , _currentTask);
             }
             else
             {
-                Debug.Log($"[QuestionnaireManager] Skipping Cue Preference (CP.json) found at sequence index {currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}. Required index 4/9/14 or already done.");
-                currentSequenceIndex++; 
+                Debug.Log($"[QuestionnaireManager] Skipping Cue Preference (CP.json) found at sequence index {_currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}. Required index 4/9/14 or already done.");
+                _currentSequenceIndex++; 
                 StartNextQuestionnaire(); 
                 return;
             }
         }
         else
         {
-            questionnaireController.StartQuestionnaire(nextFile, sessionParticipantID);
+            questionnaireController.StartQuestionnaire(nextFile, _sessionParticipantID, _currentCondition, _currentTask);
         }
     }
 
     private void HandleQuestionnaireCompleted()
     {
-        currentSequenceIndex++;
+        _currentSequenceIndex++;
         StartNextQuestionnaire();
     }
 
     // Helper function to call CoreManager's LoadNextScene safely
     private void ProceedToNextCoreScene()
     {
-        if (CoreManager.Instance != null)
+        if (SceneManager.GetActiveScene().name == "SSQ_Scene")
+        {
+            SceneManager.LoadScene("LobbyScene");
+            
+        }
+        else if (CoreManager.Instance != null)
         {
             CoreManager.Instance.LoadNextScene();
         }

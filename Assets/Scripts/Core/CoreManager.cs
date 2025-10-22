@@ -27,6 +27,7 @@ public class CoreManager : MonoBehaviour
     private bool _rigReferencesSet;
 
     public bool firstLog = true;
+    private int _SSQLog;
 
     private GameObject _ovrRig;
     private GameObject _ovrHands;
@@ -177,7 +178,7 @@ public class CoreManager : MonoBehaviour
             {
                 "PC_Task1", "Questionnaire", "GC_Task1", "Questionnaire", "Break",
                 "PC_Task2", "Questionnaire", "GC_Task2", "Questionnaire", "Break",
-                "PC_Task3", "Questionnaire", "GC_Task3", "Questionnaire", "End"
+                "PC_Task3", "Questionnaire", "GC_Task3", "Questionnaire", "SSQ_Scene"
             };
         }
         else if (currentCondition == "GC")
@@ -186,7 +187,7 @@ public class CoreManager : MonoBehaviour
             {
                 "GC_Task1", "Questionnaire", "PC_Task1", "Questionnaire", "Break",
                 "GC_Task2", "Questionnaire", "PC_Task2", "Questionnaire", "Break",
-                "GC_Task3", "Questionnaire", "PC_Task3", "Questionnaire", "End"
+                "GC_Task3", "Questionnaire", "PC_Task3", "Questionnaire", "SSQ_Scene"
             };
         }
         // Reset scene index when building order
@@ -273,6 +274,11 @@ public class CoreManager : MonoBehaviour
             if (int.TryParse(nextScene.Replace("GC_Task", ""), out int taskNum))
                 SetTask(taskNum);
         }
+        
+        if (nextScene.Contains("SSQ_Scene"))
+        {
+            incrementSSQ();
+        }
 
 
         Debug.Log($"[CoreManager] Preparing to load scene index {_currentIndex - 1}: {nextScene} (Condition={currentCondition}, Task={currentTask})");
@@ -348,8 +354,7 @@ public class CoreManager : MonoBehaviour
     // Participant ID calculation
     private string CalculateNextParticipantID()
     {
-        string logFileName = "VR_Questionnaire_Data.json";
-        string filePath = Path.Combine(Application.persistentDataPath, logFileName);
+        string filePath = Path.Combine(Application.persistentDataPath, "VR_Questionnaire_Data.json");
         int nextParticipantNumber = 1;
 
         if (File.Exists(filePath))
@@ -359,21 +364,14 @@ public class CoreManager : MonoBehaviour
                 string existingJson = File.ReadAllText(filePath);
                 AllResultsData allResultsData = JsonUtility.FromJson<AllResultsData>(existingJson);
 
-                if (allResultsData != null && allResultsData.LogResponse != null && allResultsData.LogResponse.Count > 0)
+                if (allResultsData != null && allResultsData.participants != null && allResultsData.participants.Count > 0)
                 {
                     int maxIdNumber = 0;
-                    foreach (var result in allResultsData.LogResponse)
+                    foreach (var p in allResultsData.participants)
                     {
-                        if (result.participantID != null && result.participantID.StartsWith("P"))
+                        if (p.participantID.StartsWith("P") && int.TryParse(p.participantID.Substring(1), out int num))
                         {
-                            string numberPart = result.participantID.Substring(1);
-                            if (int.TryParse(numberPart, out int idNumber))
-                            {
-                                if (idNumber > maxIdNumber)
-                                {
-                                    maxIdNumber = idNumber;
-                                }
-                            }
+                            if (num > maxIdNumber) maxIdNumber = num;
                         }
                     }
                     nextParticipantNumber = maxIdNumber + 1;
@@ -381,9 +379,19 @@ public class CoreManager : MonoBehaviour
             }
             catch (Exception e)
             {
-                Debug.LogError($"[CoreManager] Error reading results file to determine Participant ID: {e.Message}");
+                Debug.LogError($"[QuestionnaireModel] Error reading Participant ID: {e.Message}");
             }
         }
+
         return $"P{nextParticipantNumber:D3}";
+    }
+    
+    public void incrementSSQ()
+    {
+        _SSQLog++;
+    }
+    public int GetSSQLog()
+    {
+        return _SSQLog;
     }
 }

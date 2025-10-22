@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8bcf48ccd68874f90bfbd6f7bddb6ea5
+guid: 3de7e09206ade4599aa16549a13bfc15
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -110,89 +110,89 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: clicking-ezgif.com-gif-to-sprite-converter_0
+      name: GrabGIF_0
       rect:
         serializedVersion: 2
-        x: 58
-        y: 0
-        width: 1023
+        x: 0
+        y: 1080
+        width: 1080
         height: 1080
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
+      border: {x: 5, y: 5, z: 5, w: 5}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: 5ca26e5db39d44b8b9ad7c5a3787a8e5
-      internalID: 1208252710
+      spriteID: 7d336982d79194eb4af4a4ee352ec0c9
+      internalID: -1248156127
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: clicking-ezgif.com-gif-to-sprite-converter_1
+      name: GrabGIF_1
       rect:
         serializedVersion: 2
-        x: 1136
-        y: 0
-        width: 1023
+        x: 1080
+        y: 1080
+        width: 1080
         height: 1080
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 3, y: 0, z: 0, w: 0}
+      border: {x: 5, y: 5, z: 5, w: 5}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: cb1794e2b159b455bba1341118ccf693
-      internalID: 1525080273
+      spriteID: 43fbd66206ae14d3ba325d86e4c04078
+      internalID: -2075262435
       vertices: []
       indices: 
       edges: []
       weights: []
     - serializedVersion: 2
-      name: clicking-ezgif.com-gif-to-sprite-converter_2
+      name: GrabGIF_2
       rect:
         serializedVersion: 2
-        x: 2213
-        y: 4
-        width: 1023
-        height: 1076
-      alignment: 0
-      pivot: {x: 0.5, y: 0.5}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 63d2444e6fc2f4c8884424e0d9c8f0c0
-      internalID: -1952834499
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: clicking-ezgif.com-gif-to-sprite-converter_3
-      rect:
-        serializedVersion: 2
-        x: 3375
+        x: 0
         y: 0
         width: 1080
         height: 1080
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 42, y: 0, z: 0, w: 0}
+      border: {x: 5, y: 5, z: 5, w: 5}
       customData: 
       outline: []
       physicsShape: []
       tessellationDetail: 0
       bones: []
-      spriteID: bda07a702403f412a89c0975a08b579f
-      internalID: -1950659299
+      spriteID: 614265626640c4d659f18daf248f8739
+      internalID: -1846328853
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: GrabGIF_3
+      rect:
+        serializedVersion: 2
+        x: 1080
+        y: 0
+        width: 1080
+        height: 1080
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: 0
+      bones: []
+      spriteID: 4ada68afac9f94fdcb31bd8ac3ff7877
+      internalID: -535693490
       vertices: []
       indices: 
       edges: []
@@ -201,7 +201,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 0235fb1f3050a48e29bea77978b6b72d
+    spriteID: df66a62041bf24564856eb394cf41c02
     internalID: 0
     vertices: []
     indices: 
@@ -210,15 +210,13 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries:
-      - key: SpriteEditor.SliceOnImport
-        value: False
       - key: SpriteEditor.SliceSettings
-        value: '{"sliceOnImport":false,"gridCellCount":{"x":5.0,"y":1.0},"gridSpriteSize":{"x":1080.0,"y":1080.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":2.0,"y":2.0},"gridSpriteSize":{"x":1080.0,"y":1080.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":2,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      clicking-ezgif.com-gif-to-sprite-converter_0: 1208252710
-      clicking-ezgif.com-gif-to-sprite-converter_1: 1525080273
-      clicking-ezgif.com-gif-to-sprite-converter_2: -1952834499
-      clicking-ezgif.com-gif-to-sprite-converter_3: -1950659299
+      GrabGIF_0: -1248156127
+      GrabGIF_1: -2075262435
+      GrabGIF_2: -1846328853
+      GrabGIF_3: -535693490
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

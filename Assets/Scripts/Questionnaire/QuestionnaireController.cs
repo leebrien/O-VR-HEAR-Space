@@ -29,6 +29,8 @@ public class QuestionnaireController : MonoBehaviour
 
     private bool isSubmitting = false;
     private string currentParticipantID;
+    private string currentCondition;
+    private int currentTask;
 
     void Awake()
     {
@@ -50,9 +52,11 @@ public class QuestionnaireController : MonoBehaviour
         forwardButton.interactable = true;
     }
 
-    public void StartQuestionnaire(TextAsset jsonFile, string participantID)
+    public void StartQuestionnaire(TextAsset jsonFile, string participantID, string condition, int task )
     {
         currentParticipantID = participantID;
+        currentCondition = condition;
+        currentTask = task;
         model.InitializeWithData(jsonFile);
         questionnairePanel.SetActive(true);
         isSubmitting = false;
@@ -158,7 +162,7 @@ public class QuestionnaireController : MonoBehaviour
         if (model.currentQuestionIndex == model.GetTotalQuestions() - 1)
         {
             isSubmitting = true;
-            model.SubmitData(currentParticipantID);
+            model.SubmitData(currentParticipantID, currentCondition, currentTask);
             questionnairePanel.SetActive(false);
             Debug.Log($"Questionnaire '{model.QuestionnaireName}' finished for {currentParticipantID}.");
             OnQuestionnaireCompleted?.Invoke();

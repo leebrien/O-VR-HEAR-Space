@@ -5,134 +5,210 @@ using UnityEngine.SceneManagement;
 
 public class PracticeUIManagement : MonoBehaviour
 {
-    public GameObject lobbyPanel;
     public GameObject welcomeScreenLayout;
-    public GameObject imageContainer;
-    public GameObject tutorialPanelGuide;
+    public GameObject tutorialPanelGuide1;
+    public GameObject tutorialPanelGuide2;
+    public GameObject tutorialPanelGuide3;
+    public GameObject tutorialPanelGuide4;
+    public GameObject tutorialReusableGuide;
+    public GameObject timerBody;
+    public TextMeshProUGUI timerText;
+    public GameObject nextButton;
+    public TextMeshProUGUI tutorialTitle;
+    public TextMeshProUGUI tutorialInstructions;
+    public GameObject tutorialPanel;
+
     private bool _firstLog;
     private int currentTaskType = 0;
 
     public PracticeSoundManager practiceSoundManager;
     private int _tutorialIndex = 0;
 
-    private TextMeshProUGUI _instructionTutorial;
     private TextMeshProUGUI _welcomeText;
 
     private void Start()
     {
         _firstLog = practiceSoundManager.GetLoggingStatus();
-        
+
         if (!_firstLog)
         {
             _tutorialIndex = 0;
-            tutorialPanelGuide.SetActive(true);
+            tutorialPanelGuide1.SetActive(true);
         }
-        
-        if (tutorialPanelGuide != null)
+        else
         {
-            var titleObj = tutorialPanelGuide.transform.Find("tutorialInstructionTitle");
-            if (titleObj)
-                _instructionTutorial = titleObj.GetComponent<TextMeshProUGUI>();
+            if (welcomeScreenLayout!=null)
+            {
+                var titleObj = welcomeScreenLayout.transform.Find("welcomeInstructionTitle");
+                if (titleObj)
+                    _welcomeText = titleObj.GetComponent<TextMeshProUGUI>();
+            }
+            StartCoroutine(ShowTutorialPanelWithDelay());
         }
-
-        if (welcomeScreenLayout!=null)
-        {
-            var titleObj = welcomeScreenLayout.transform.Find("welcomeInstructionTitle");
-            if (titleObj)
-                _welcomeText = titleObj.GetComponent<TextMeshProUGUI>();
-            
-        }
-        
-        StartCoroutine(ShowTutorialPanelWithDelay());
     }
-    
+
     private IEnumerator ShowTutorialPanelWithDelay()
     {
-        float timeDelay = 5f;
+        float timeDelay = 6f;
         float timer = timeDelay;
         while (timer > 0f)
         {
             if (_welcomeText)
-                _welcomeText.text = $"The VR environment tutorial will begin shortly in {Mathf.CeilToInt(timer)} seconds.";
+                _welcomeText.text = $"The VR environment tutorial will begin shortly in {Mathf.CeilToInt(timer)}s.";
             yield return null;
             timer -= Time.deltaTime;
         }
         welcomeScreenLayout.SetActive(false);
-        tutorialPanelGuide.SetActive(true);
+        tutorialPanelGuide1.SetActive(true);
+        timerBody.SetActive(true);
+        timer = 10f;
+        while (timer > 0f)
+        {
+            timerText.text = $"{Mathf.CeilToInt(timer)}s";
+            yield return null;
+            timer -= Time.deltaTime;
+        }
+        timerBody.SetActive(false);
+        tutorialPanelGuide1.SetActive(false);
         CoreManager.Instance.SetFirstLog(false);
+        practiceSoundManager.GetTrackingSwitcher().SwitchToHandsOnly();
     }
-    
 
-    public void LoadNextTutorial()
+
+    public IEnumerator LoadNextTutorial()
     {
-        if (_tutorialIndex == 1) imageContainer.SetActive(false);
-        
         _tutorialIndex++;
 
         switch (_tutorialIndex)
         {
             case 1:
-                practiceSoundManager.GetTrackingSwitcher().SwitchToControllersOnly();
-                _instructionTutorial.text =
-                    "You can also interact with objects from a distance using the controller." +
-                    "\nSimply point your hand toward the target and press the trigger with your index finger. " +
-                    "Below is the visual reference showing how to press the trigger.";
-                imageContainer.SetActive(true);
+            {
+                tutorialPanelGuide2.SetActive(true);
+                nextButton.SetActive(true);
                 break;
-            
+            }
+
             case 2:
-                _instructionTutorial.text =
-                    "You’ll now try pointing using the same method as selecting." +
-                    "\nAfter pressing Next, aim the line at the blue sphere and press the trigger to point.";
+            {
+                tutorialPanelGuide2.SetActive(false);
+                practiceSoundManager.GetTrackingSwitcher().SwitchToControllersOnly();
+                tutorialPanelGuide3.SetActive(true);
                 break;
-            
-            case  3:
+            }
+
+            case 3:
+            {
+                nextButton.SetActive(false);
+                tutorialPanelGuide3.SetActive(false);
+                practiceSoundManager.GetTrackingSwitcher().SwitchToBoth();
+                tutorialReusableGuide.SetActive(true);
+                timerBody.SetActive(true);
+                var timer = 8f;
+                while (timer > 0f)
+                {
+                    timerText.text = $"{Mathf.CeilToInt(timer)}s";
+                    yield return null;
+                    timer -= Time.deltaTime;
+                }
+                timerBody.SetActive(false);
+                tutorialReusableGuide.SetActive(false);
                 currentTaskType = 1;
-                lobbyPanel.SetActive(false);
                 if (practiceSoundManager != null)
                 {
                     practiceSoundManager.PlayObject(currentTaskType);
                 }
                 break;
-            
+            }
+
             case 4:
-                practiceSoundManager.GetTrackingSwitcher().SwitchToHandsOnly();
-                _instructionTutorial.text =
-                    "Now that you know how to point, let's try grabbing." +
-                    "\nAfter pressing Next, walk toward the blue sphere and grab it using your hand.";
+            {
+                tutorialTitle.text = "Great job!";
+                tutorialInstructions.text =
+                    "Awesome! Now we can move on to learning more ways to interact in the VR world.";
+                tutorialReusableGuide.SetActive(true);
+                nextButton.SetActive(true);
                 break;
+            }
+
             case 5:
+            {
+                tutorialPanelGuide4.SetActive(true);
+                break;
+            }
+
+            case 6:
+            {
+                nextButton.SetActive(false);
+                tutorialPanelGuide4.SetActive(false);
+                tutorialTitle.text = "Let's try grabbing!";
+                tutorialInstructions.text =
+                    "Once the timer ends, walk toward the blue sphere and grab it with your hand.";
+                tutorialReusableGuide.SetActive(true);
+                timerBody.SetActive(true);
+                var timer = 8f;
+                while (timer > 0f)
+                {
+                    timerText.text = $"{Mathf.CeilToInt(timer)}s";
+                    yield return null;
+                    timer -= Time.deltaTime;
+                }
+                timerBody.SetActive(false);
+                tutorialReusableGuide.SetActive(false);
                 currentTaskType = 2;
-                lobbyPanel.SetActive(false);
                 if (practiceSoundManager != null)
                 {
                     practiceSoundManager.PlayObject(currentTaskType);
                 }
                 break;
-            case 6:
-                _instructionTutorial.text =
-                    "You've completed the tutorial!" +
-                    "\nAfter pressing Next, you'll be redirected to the main study lobby." +
-                    "\nBefore you can proceed, make sure to import your Hearsona by clicking the 'Import Hearsona' button on the next screen.";
-                break;
+            }
+
             case 7:
+            {
+                tutorialTitle.text = "Nicely done!";
+                tutorialInstructions.text =
+                    "You’ve completed the tutorial. Before proceeding we need you to answer a simulation sickness test first. " +
+                    "You'll be redirected in a moment.";
+                tutorialReusableGuide.SetActive(true);
+                timerBody.SetActive(true);
+                var timer = 10f;
+                while (timer > 0f)
+                {
+                    timerText.text = $"{Mathf.CeilToInt(timer)}s";
+                    yield return null;
+                    timer -= Time.deltaTime;
+                }
+                // SceneManager.LoadScene("SSQ_Scene");
+                
+                /*tutorialTitle.text = "Thank you!";
+                tutorialInstructions.text =
+                    "You'll now be redirected to the lobby. " +
+                    "You’ll see a panel with three buttons: Play Tutorial, Import from Hearsona, and Proceed.";
+                tutorialReusableGuide.SetActive(true);
+                timerBody.SetActive(true);
+                var timer = 10f;
+                while (timer > 0f)
+                {
+                    timerText.text = $"{Mathf.CeilToInt(timer)}s";
+                    yield return null;
+                    timer -= Time.deltaTime;
+                }*/
                 SceneManager.LoadScene("LobbyScene");
                 break;
+            }
         }
-        
     }
-    
+
 
     public void OnHomeButtonClick()
     {
         SceneManager.LoadScene("LobbyScene");
     }
-    
+
 
     public void OnStartButtonClick()
     {
         // Hide the main lobby panel to start the task
-        lobbyPanel.SetActive(false);
+        tutorialPanel.SetActive(false);
 
         // Use the stored task type to generate the object
         if (practiceSoundManager != null)
@@ -146,8 +222,9 @@ public class PracticeUIManagement : MonoBehaviour
         // Stop the object and show the lobby panel again
         practiceSoundManager?.StopObject();
 
-        lobbyPanel.SetActive(true);
-        
-        LoadNextTutorial();
+        tutorialPanel.SetActive(true);
+
+        StartCoroutine(LoadNextTutorial());
     }
+
 }
