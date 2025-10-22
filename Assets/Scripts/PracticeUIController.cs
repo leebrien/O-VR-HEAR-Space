@@ -164,7 +164,7 @@ public class PracticeUIManagement : MonoBehaviour
             }
 
             case 7:
-            {
+            {  practiceSoundManager?.GetTrackingSwitcher().SwitchToBoth();
                 // long-wait step -> start dedicated coroutine
                 StartTutorialCoroutine(TutorialStep7Routine());
                 break;
@@ -223,6 +223,7 @@ public class PracticeUIManagement : MonoBehaviour
 
     private IEnumerator TutorialStep7Routine()
     {
+        
         tutorialTitle.text = "Nicely done!";
         tutorialInstructions.text =
             "You’ve completed the tutorial. Before proceeding we need you to answer a simulation sickness test first. " +
@@ -239,7 +240,7 @@ public class PracticeUIManagement : MonoBehaviour
         }
 
         // navigate away
-        SceneManager.LoadScene("SSQ_Scene");
+        SceneManager.LoadScene("SSQ-Scene");
 
         _tutorialCoroutine = null;
     }
