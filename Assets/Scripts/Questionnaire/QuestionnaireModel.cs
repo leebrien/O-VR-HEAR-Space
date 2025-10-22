@@ -149,6 +149,15 @@ public class QuestionnaireModel : MonoBehaviour
         
     }
 
+    public QuestionData GetQuestionAtIndex(int index)
+    {
+        if (data != null && data.questions != null && index >= 0 && index < data.questions.Count)
+        {
+            return data.questions[index];
+        }
+        return null;
+    }
+
     public string QuestionnaireName
     {
         get { return data != null ? data.questionnaireName : "No Questionnaire Loaded"; }
