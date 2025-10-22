@@ -239,7 +239,7 @@ public class PracticeUIManagement : MonoBehaviour
         }
 
         // navigate away
-        SceneManager.LoadScene("LobbyScene");
+        SceneManager.LoadScene("SSQ_Scene");
 
         _tutorialCoroutine = null;
     }

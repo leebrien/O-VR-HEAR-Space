@@ -145,8 +145,10 @@ public class QuestionnaireManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "SSQ_Scene")
         {
-            SceneManager.LoadScene("LobbyScene");
+            var ssqPanelController = FindObjectOfType<SSQPanelController>(true);
             
+            ssqPanelController.EnableSSQEnding();
+
         }
         else if (CoreManager.Instance != null)
         {
