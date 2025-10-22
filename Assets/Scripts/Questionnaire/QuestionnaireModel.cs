@@ -76,21 +76,28 @@ public class QuestionnaireModel : MonoBehaviour
     // Accepts participantID from Controller
     public void SubmitData(string participantID, string conditionName, int taskNumber)
     {
+        // 1. Create the new result and populate it with all necessary info
         QuestionnaireResult newResult = new QuestionnaireResult
         {
+            // --- MODIFIED: Assign condition and taskNumber directly ---
+            condition = conditionName,
+            taskNumber = taskNumber,
+            // --- END MODIFIED ---
+
             questionnaireName = this.QuestionnaireName,
             timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
             responses = new List<ResponseItem>()
         };
-        
+
         foreach (var response in sessionResponses)
         {
             newResult.responses.Add(new ResponseItem(response.Key, response.Value));
         }
-        
+
         string filePath = Path.Combine(Application.persistentDataPath, LOGFileName);
         AllResultsData allResultsData;
 
+        // 2. Load existing data if the file exists
         if (File.Exists(filePath))
         {
             try
@@ -110,31 +117,23 @@ public class QuestionnaireModel : MonoBehaviour
         {
             allResultsData = new AllResultsData();
         }
-        
+
+        // 3. Find the correct participant or create a new one
         ParticipantData participant = allResultsData.participants
             .Find(p => p.participantID == participantID);
-        
+
         if (participant == null)
         {
             participant = new ParticipantData { participantID = participantID };
             allResultsData.participants.Add(participant);
         }
         
-        ConditionResult conditionResult = participant.conditionResults
-            .Find(c => c.condition == conditionName && c.taskNumber == taskNumber);
+        // --- MODIFIED: Logic is now much simpler ---
+        // 4. Add the new result directly to the participant's list
+        participant.questionnaireResults.Add(newResult);
+        // --- END MODIFIED ---
 
-        if (conditionResult == null)
-        {
-            conditionResult = new ConditionResult
-            {
-                condition = conditionName,
-                taskNumber = taskNumber
-            };
-            participant.conditionResults.Add(conditionResult);
-        }
-        
-        conditionResult.questionnaires.Add(newResult);
-        
+        // 5. Save the updated data back to the file
         try
         {
             string jsonToSave = JsonUtility.ToJson(allResultsData, true);
@@ -145,8 +144,6 @@ public class QuestionnaireModel : MonoBehaviour
         {
             Debug.LogError($"[QuestionnaireModel] Failed to save JSON: {e.Message}");
         }
-        
-        
     }
 
     public string QuestionnaireName

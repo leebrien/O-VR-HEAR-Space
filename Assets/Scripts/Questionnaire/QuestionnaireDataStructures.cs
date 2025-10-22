@@ -17,24 +17,21 @@ public class ResponseItem
 [Serializable]
 public class QuestionnaireResult
 {
+    
+    public string condition;
+    public int taskNumber;
+
     public string questionnaireName;
     public string timestamp;
     public List<ResponseItem> responses = new List<ResponseItem>();
 }
 
-[Serializable]
-public class ConditionResult
-{
-    public string condition; // e.g., "Personalized" or "Standard"
-    public int taskNumber;
-    public List<QuestionnaireResult> questionnaires = new List<QuestionnaireResult>();
-}
 
 [Serializable]
 public class ParticipantData
 {
     public string participantID;
-    public List<ConditionResult> conditionResults = new List<ConditionResult>();
+    public List<QuestionnaireResult> questionnaireResults = new List<QuestionnaireResult>();
 }
 
 [Serializable]
@@ -42,6 +39,8 @@ public class AllResultsData
 {
     public List<ParticipantData> participants = new List<ParticipantData>();
 }
+
+
 
 
 [Serializable]

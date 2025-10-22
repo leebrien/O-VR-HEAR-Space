@@ -25,6 +25,7 @@ public class PracticeUIManagement : MonoBehaviour
     private int _tutorialIndex = 0;
 
     private TextMeshProUGUI _welcomeText;
+    private Coroutine _tutorialCoroutine;
 
     private void Start()
     {
@@ -37,13 +38,39 @@ public class PracticeUIManagement : MonoBehaviour
         }
         else
         {
-            if (welcomeScreenLayout!=null)
+            if (welcomeScreenLayout != null)
             {
                 var titleObj = welcomeScreenLayout.transform.Find("welcomeInstructionTitle");
                 if (titleObj)
                     _welcomeText = titleObj.GetComponent<TextMeshProUGUI>();
             }
-            StartCoroutine(ShowTutorialPanelWithDelay());
+            StartTutorialCoroutine(ShowTutorialPanelWithDelay());
+        }
+    }
+
+    private void OnDisable()
+    {
+        StopTutorialCoroutine();
+    }
+
+    private Coroutine StartTutorialCoroutine(IEnumerator routine)
+    {
+        if (_tutorialCoroutine != null)
+        {
+            StopCoroutine(_tutorialCoroutine);
+            _tutorialCoroutine = null;
+        }
+
+        _tutorialCoroutine = StartCoroutine(routine);
+        return _tutorialCoroutine;
+    }
+
+    private void StopTutorialCoroutine()
+    {
+        if (_tutorialCoroutine != null)
+        {
+            StopCoroutine(_tutorialCoroutine);
+            _tutorialCoroutine = null;
         }
     }
 
@@ -58,24 +85,32 @@ public class PracticeUIManagement : MonoBehaviour
             yield return null;
             timer -= Time.deltaTime;
         }
+
         welcomeScreenLayout.SetActive(false);
         tutorialPanelGuide1.SetActive(true);
         timerBody.SetActive(true);
-        timer = 10f;
+
+        timer = 8f;
         while (timer > 0f)
         {
             timerText.text = $"{Mathf.CeilToInt(timer)}s";
             yield return null;
             timer -= Time.deltaTime;
         }
+
         timerBody.SetActive(false);
         tutorialPanelGuide1.SetActive(false);
         CoreManager.Instance.SetFirstLog(false);
-        practiceSoundManager.GetTrackingSwitcher().SwitchToHandsOnly();
+        practiceSoundManager?.GetTrackingSwitcher().SwitchToHandsOnly();
+
+        // Mark this coroutine finished before calling the void method
+        _tutorialCoroutine = null;
+
+        // Call the void loader
+        LoadNextTutorial();
     }
 
-
-    public IEnumerator LoadNextTutorial()
+    public void LoadNextTutorial()
     {
         _tutorialIndex++;
 
@@ -91,32 +126,15 @@ public class PracticeUIManagement : MonoBehaviour
             case 2:
             {
                 tutorialPanelGuide2.SetActive(false);
-                practiceSoundManager.GetTrackingSwitcher().SwitchToControllersOnly();
+                practiceSoundManager?.GetTrackingSwitcher().SwitchToControllersOnly();
                 tutorialPanelGuide3.SetActive(true);
                 break;
             }
 
             case 3:
             {
-                nextButton.SetActive(false);
-                tutorialPanelGuide3.SetActive(false);
-                practiceSoundManager.GetTrackingSwitcher().SwitchToBoth();
-                tutorialReusableGuide.SetActive(true);
-                timerBody.SetActive(true);
-                var timer = 8f;
-                while (timer > 0f)
-                {
-                    timerText.text = $"{Mathf.CeilToInt(timer)}s";
-                    yield return null;
-                    timer -= Time.deltaTime;
-                }
-                timerBody.SetActive(false);
-                tutorialReusableGuide.SetActive(false);
-                currentTaskType = 1;
-                if (practiceSoundManager != null)
-                {
-                    practiceSoundManager.PlayObject(currentTaskType);
-                }
+                // long-wait step -> start dedicated coroutine
+                StartTutorialCoroutine(TutorialStep3Routine());
                 break;
             }
 
@@ -125,6 +143,7 @@ public class PracticeUIManagement : MonoBehaviour
                 tutorialTitle.text = "Great job!";
                 tutorialInstructions.text =
                     "Awesome! Now we can move on to learning more ways to interact in the VR world.";
+                tutorialPanel.SetActive(true);
                 tutorialReusableGuide.SetActive(true);
                 nextButton.SetActive(true);
                 break;
@@ -132,70 +151,97 @@ public class PracticeUIManagement : MonoBehaviour
 
             case 5:
             {
+                tutorialReusableGuide.SetActive(false);
                 tutorialPanelGuide4.SetActive(true);
                 break;
             }
 
             case 6:
             {
-                nextButton.SetActive(false);
-                tutorialPanelGuide4.SetActive(false);
-                tutorialTitle.text = "Let's try grabbing!";
-                tutorialInstructions.text =
-                    "Once the timer ends, walk toward the blue sphere and grab it with your hand.";
-                tutorialReusableGuide.SetActive(true);
-                timerBody.SetActive(true);
-                var timer = 8f;
-                while (timer > 0f)
-                {
-                    timerText.text = $"{Mathf.CeilToInt(timer)}s";
-                    yield return null;
-                    timer -= Time.deltaTime;
-                }
-                timerBody.SetActive(false);
-                tutorialReusableGuide.SetActive(false);
-                currentTaskType = 2;
-                if (practiceSoundManager != null)
-                {
-                    practiceSoundManager.PlayObject(currentTaskType);
-                }
+                // long-wait step -> start dedicated coroutine
+                StartTutorialCoroutine(TutorialStep6Routine());
                 break;
             }
 
             case 7:
             {
-                tutorialTitle.text = "Nicely done!";
-                tutorialInstructions.text =
-                    "You’ve completed the tutorial. Before proceeding we need you to answer a simulation sickness test first. " +
-                    "You'll be redirected in a moment.";
-                tutorialReusableGuide.SetActive(true);
-                timerBody.SetActive(true);
-                var timer = 10f;
-                while (timer > 0f)
-                {
-                    timerText.text = $"{Mathf.CeilToInt(timer)}s";
-                    yield return null;
-                    timer -= Time.deltaTime;
-                }
-                // SceneManager.LoadScene("SSQ_Scene");
-                
-                /*tutorialTitle.text = "Thank you!";
-                tutorialInstructions.text =
-                    "You'll now be redirected to the lobby. " +
-                    "You’ll see a panel with three buttons: Play Tutorial, Import from Hearsona, and Proceed.";
-                tutorialReusableGuide.SetActive(true);
-                timerBody.SetActive(true);
-                var timer = 10f;
-                while (timer > 0f)
-                {
-                    timerText.text = $"{Mathf.CeilToInt(timer)}s";
-                    yield return null;
-                    timer -= Time.deltaTime;
-                }*/
-                SceneManager.LoadScene("LobbyScene");
+                // long-wait step -> start dedicated coroutine
+                StartTutorialCoroutine(TutorialStep7Routine());
                 break;
             }
         }
+    }
+
+    private IEnumerator TutorialStep3Routine()
+    {
+        nextButton.SetActive(false);
+        tutorialPanelGuide3.SetActive(false);
+        practiceSoundManager?.GetTrackingSwitcher().SwitchToBoth();
+        tutorialReusableGuide.SetActive(true);
+        timerBody.SetActive(true);
+        float waitTimer = 8f;
+        while (waitTimer > 0f)
+        {
+            timerText.text = $"{Mathf.CeilToInt(waitTimer)}s";
+            yield return null;
+            waitTimer -= Time.deltaTime;
+        }
+        timerBody.SetActive(false);
+        tutorialReusableGuide.SetActive(false);
+        currentTaskType = 1;
+        practiceSoundManager?.PlayObject(currentTaskType);
+        tutorialPanel.SetActive(false);
+
+        // mark coroutine finished
+        _tutorialCoroutine = null;
+    }
+
+    private IEnumerator TutorialStep6Routine()
+    {
+        nextButton.SetActive(false);
+        tutorialPanelGuide4.SetActive(false);
+        tutorialTitle.text = "Let's try grabbing!";
+        tutorialInstructions.text =
+            "Once the timer ends, walk toward the blue sphere and grab it with your hand.";
+        tutorialReusableGuide.SetActive(true);
+        timerBody.SetActive(true);
+        float waitTimer6 = 8f;
+        while (waitTimer6 > 0f)
+        {
+            timerText.text = $"{Mathf.CeilToInt(waitTimer6)}s";
+            yield return null;
+            waitTimer6 -= Time.deltaTime;
+        }
+        timerBody.SetActive(false);
+        tutorialReusableGuide.SetActive(false);
+        tutorialPanel.SetActive(false);
+        currentTaskType = 2;
+        practiceSoundManager?.PlayObject(currentTaskType);
+
+        _tutorialCoroutine = null;
+    }
+
+    private IEnumerator TutorialStep7Routine()
+    {
+        tutorialTitle.text = "Nicely done!";
+        tutorialInstructions.text =
+            "You’ve completed the tutorial. Before proceeding we need you to answer a simulation sickness test first. " +
+            "You'll be redirected in a moment.";
+        tutorialPanel.SetActive(true);
+        tutorialReusableGuide.SetActive(true);
+        timerBody.SetActive(true);
+        float waitTimer7 = 10f;
+        while (waitTimer7 > 0f)
+        {
+            timerText.text = $"{Mathf.CeilToInt(waitTimer7)}s";
+            yield return null;
+            waitTimer7 -= Time.deltaTime;
+        }
+
+        // navigate away
+        SceneManager.LoadScene("LobbyScene");
+
+        _tutorialCoroutine = null;
     }
 
     public void OnHomeButtonClick()
@@ -203,16 +249,14 @@ public class PracticeUIManagement : MonoBehaviour
         SceneManager.LoadScene("LobbyScene");
     }
 
-    
     // ReSharper disable Unity.PerformanceAnalysis
     public void OnTaskComplete()
     {
-        // Stop the object and show the lobby panel again
         practiceSoundManager?.StopObject();
 
         tutorialPanel.SetActive(true);
 
-        StartCoroutine(LoadNextTutorial());
+        // advance synchronously (helper coroutines will run where needed)
+        LoadNextTutorial();
     }
-
 }
