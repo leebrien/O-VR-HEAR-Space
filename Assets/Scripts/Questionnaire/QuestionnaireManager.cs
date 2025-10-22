@@ -143,9 +143,9 @@ public class QuestionnaireManager : MonoBehaviour
     // Helper function to call CoreManager's LoadNextScene safely
     private void ProceedToNextCoreScene()
     {
-        if (SceneManager.GetActiveScene().name == "SSQ_Scene")
+        if (SceneManager.GetActiveScene().name == "SSQ-Scene")
         {
-            var ssqPanelController = FindObjectOfType<SSQPanelController>(true);
+            var ssqPanelController = FindFirstObjectByType<SSQPanelController>();
             
             ssqPanelController.EnableSSQEnding();
 
