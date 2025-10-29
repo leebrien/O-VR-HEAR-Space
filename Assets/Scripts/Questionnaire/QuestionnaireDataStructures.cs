@@ -15,6 +15,19 @@ public class ResponseItem
 }
 
 [Serializable]
+public class TaskDurationLog
+{
+    public string taskIdentifier;
+    public float duration;
+
+    public TaskDurationLog(string id, float dur)
+    {
+        taskIdentifier = id;
+        duration = dur;
+    }
+}
+
+[Serializable]
 public class QuestionnaireResult
 {
     
@@ -32,6 +45,7 @@ public class ParticipantData
 {
     public string participantID;
     public List<QuestionnaireResult> questionnaireResults = new List<QuestionnaireResult>();
+    public List<TaskDurationLog> taskDurations = new List<TaskDurationLog>();
 }
 
 [Serializable]

@@ -1,14 +1,13 @@
-using UnityEngine;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using UnityEngine;
 
 
 public class QuestionnaireModel : MonoBehaviour
 {
-    // Keep public if might assign for testing, otherwise make private
-    // public TextAsset jsonFile;
-    [SerializeField] private TextAsset jsonFile;
+    private TextAsset jsonFile;
 
     private QuestionnaireData data;
     public int currentQuestionIndex { get; private set; }
@@ -79,10 +78,8 @@ public class QuestionnaireModel : MonoBehaviour
         // 1. Create the new result and populate it with all necessary info
         QuestionnaireResult newResult = new QuestionnaireResult
         {
-            // --- MODIFIED: Assign condition and taskNumber directly ---
             condition = conditionName,
             taskNumber = taskNumber,
-            // --- END MODIFIED ---
 
             questionnaireName = this.QuestionnaireName,
             timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
@@ -127,13 +124,33 @@ public class QuestionnaireModel : MonoBehaviour
             participant = new ParticipantData { participantID = participantID };
             allResultsData.participants.Add(participant);
         }
-        
-        // --- MODIFIED: Logic is now much simpler ---
+
         // 4. Add the new result directly to the participant's list
         participant.questionnaireResults.Add(newResult);
-        // --- END MODIFIED ---
 
-        // 5. Save the updated data back to the file
+        // 5. Get task durations from CoreManager and update the participant's log
+        if (CoreManager.Instance != null)
+        {
+            // Get the dictionary from CoreManager
+            Dictionary<string, float> coreTaskDurations = CoreManager.Instance.GetTaskDurations();
+
+            // Convert the dictionary to the serializable List<TaskDurationLog>
+            // This overwrites the old list which ensures that it's always up-to-date
+            participant.taskDurations = coreTaskDurations
+                .Select(kvp => new TaskDurationLog(kvp.Key, kvp.Value))
+                .OrderBy(log => log.taskIdentifier)
+                .ToList();
+        }
+        else
+        {
+            Debug.LogWarning("[QuestionnaireModel] CoreManager.Instance is null. Cannot log task durations.");
+            if (participant.taskDurations == null)
+            {
+                participant.taskDurations = new List<TaskDurationLog>();
+            }
+        }
+
+        // 6. Save the updated data back to the file
         try
         {
             string jsonToSave = JsonUtility.ToJson(allResultsData, true);
