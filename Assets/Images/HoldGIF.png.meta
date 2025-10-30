@@ -113,10 +113,10 @@ TextureImporter:
       name: HoldGIF_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 21
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1059
+        height: 1020
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -135,10 +135,10 @@ TextureImporter:
       name: HoldGIF_1
       rect:
         serializedVersion: 2
-        x: 1080
+        x: 1100
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1060
+        height: 1014
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -157,10 +157,10 @@ TextureImporter:
       name: HoldGIF_2
       rect:
         serializedVersion: 2
-        x: 2160
+        x: 2187
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1053
+        height: 1022
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -179,10 +179,10 @@ TextureImporter:
       name: HoldGIF_3
       rect:
         serializedVersion: 2
-        x: 3240
+        x: 3274
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1046
+        height: 1020
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -201,10 +201,10 @@ TextureImporter:
       name: HoldGIF_4
       rect:
         serializedVersion: 2
-        x: 0
+        x: 24
         y: 0
-        width: 1080
-        height: 1080
+        width: 1056
+        height: 997
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -223,10 +223,10 @@ TextureImporter:
       name: HoldGIF_5
       rect:
         serializedVersion: 2
-        x: 1080
+        x: 1097
         y: 0
-        width: 1080
-        height: 1080
+        width: 1063
+        height: 999
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -245,10 +245,10 @@ TextureImporter:
       name: HoldGIF_6
       rect:
         serializedVersion: 2
-        x: 2160
+        x: 2190
         y: 0
-        width: 1080
-        height: 1080
+        width: 1050
+        height: 994
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}

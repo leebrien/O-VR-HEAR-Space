@@ -113,13 +113,13 @@ TextureImporter:
       name: PokeGIF_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 33
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1047
+        height: 1049
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -135,13 +135,13 @@ TextureImporter:
       name: PokeGIF_1
       rect:
         serializedVersion: 2
-        x: 1080
+        x: 1116
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1044
+        height: 1046
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -157,13 +157,13 @@ TextureImporter:
       name: PokeGIF_2
       rect:
         serializedVersion: 2
-        x: 2160
+        x: 2199
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1041
+        height: 1043
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -179,13 +179,13 @@ TextureImporter:
       name: PokeGIF_3
       rect:
         serializedVersion: 2
-        x: 3240
+        x: 3268
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1052
+        height: 1036
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -201,13 +201,13 @@ TextureImporter:
       name: PokeGIF_4
       rect:
         serializedVersion: 2
-        x: 4320
+        x: 4351
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1049
+        height: 1043
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -223,13 +223,13 @@ TextureImporter:
       name: PokeGIF_5
       rect:
         serializedVersion: 2
-        x: 0
+        x: 36
         y: 0
-        width: 1080
-        height: 1080
+        width: 1044
+        height: 1056
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -245,13 +245,13 @@ TextureImporter:
       name: PokeGIF_6
       rect:
         serializedVersion: 2
-        x: 1080
+        x: 1106
         y: 0
-        width: 1080
-        height: 1080
+        width: 1054
+        height: 1046
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -267,13 +267,13 @@ TextureImporter:
       name: PokeGIF_7
       rect:
         serializedVersion: 2
-        x: 2160
+        x: 2189
         y: 0
-        width: 1080
-        height: 1080
+        width: 1051
+        height: 1043
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -289,13 +289,13 @@ TextureImporter:
       name: PokeGIF_8
       rect:
         serializedVersion: 2
-        x: 3240
+        x: 3275
         y: 0
-        width: 1080
-        height: 1080
+        width: 1045
+        height: 1043
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []

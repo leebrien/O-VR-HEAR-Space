@@ -30,6 +30,6 @@ public class SSQPanelController : MonoBehaviour
 
     public void loadLobby()
     {
-        SceneManager.LoadScene("LobbyScene");
+        SceneLoader.LoadScene("LobbyScene");
     }
 }

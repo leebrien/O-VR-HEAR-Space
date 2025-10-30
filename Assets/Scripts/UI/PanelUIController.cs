@@ -22,7 +22,7 @@ public class PanelUIController : MonoBehaviour
     private void Start()
     {
         _proceedButton = lobbyMenuDesign.transform.Find("rowButtonLayout/proceedButton").GetComponent<Button>();
-        _proceedButton.interactable = true;
+        _proceedButton.interactable = false;
     }
 
     public void OnPlayTutorialButtonClick()

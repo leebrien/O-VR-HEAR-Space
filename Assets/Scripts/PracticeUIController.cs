@@ -126,8 +126,8 @@ public class PracticeUIManagement : MonoBehaviour
             case 2:
             {
                 tutorialPanelGuide2.SetActive(false);
-                practiceSoundManager?.GetTrackingSwitcher().SwitchToControllersOnly();
                 tutorialPanelGuide3.SetActive(true);
+                practiceSoundManager?.GetTrackingSwitcher().SwitchToControllersOnly();
                 break;
             }
 
@@ -176,7 +176,6 @@ public class PracticeUIManagement : MonoBehaviour
     {
         nextButton.SetActive(false);
         tutorialPanelGuide3.SetActive(false);
-        practiceSoundManager?.GetTrackingSwitcher().SwitchToBoth();
         tutorialReusableGuide.SetActive(true);
         timerBody.SetActive(true);
         float waitTimer = 8f;
@@ -186,6 +185,7 @@ public class PracticeUIManagement : MonoBehaviour
             yield return null;
             waitTimer -= Time.deltaTime;
         }
+        practiceSoundManager?.GetTrackingSwitcher().SwitchToBoth();
         timerBody.SetActive(false);
         tutorialReusableGuide.SetActive(false);
         currentTaskType = 1;
@@ -239,15 +239,15 @@ public class PracticeUIManagement : MonoBehaviour
             waitTimer7 -= Time.deltaTime;
         }
 
-        // navigate away
-        SceneManager.LoadScene("SSQ-Scene");
-
         _tutorialCoroutine = null;
+        // navigate away
+        SceneLoader.LoadScene("SSQ-Scene");
+        
     }
 
     public void OnHomeButtonClick()
     {
-        SceneManager.LoadScene("LobbyScene");
+        SceneLoader.LoadScene("LobbyScene");
     }
 
     // ReSharper disable Unity.PerformanceAnalysis

@@ -124,7 +124,7 @@ public class CoreManager : MonoBehaviour
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         // Check if scene name contains "Task" instead of just "Task1"
-        if (scene.name == "PracticeScene" || scene.name.Contains("Task"))
+        if (scene.name == "PracticeScene" || scene.name.Contains("Task1"))
             StartCoroutine(LinkDependenciesWhenReady());
     }
 
@@ -178,7 +178,7 @@ public class CoreManager : MonoBehaviour
             {
                 "PC_Task1", "Questionnaire", "GC_Task1", "Questionnaire", "Break",
                 "PC_Task2", "Questionnaire", "GC_Task2", "Questionnaire", "Break",
-                "PC_Task3", "Questionnaire", "GC_Task3", "Questionnaire", "SSQ_Scene"
+                "PC_Task3", "Questionnaire", "GC_Task3", "Questionnaire", "SSQ-Scene"
             };
         }
         else if (currentCondition == "GC")
@@ -187,7 +187,7 @@ public class CoreManager : MonoBehaviour
             {
                 "GC_Task1", "Questionnaire", "PC_Task1", "Questionnaire", "Break",
                 "GC_Task2", "Questionnaire", "PC_Task2", "Questionnaire", "Break",
-                "GC_Task3", "Questionnaire", "PC_Task3", "Questionnaire", "SSQ_Scene"
+                "GC_Task3", "Questionnaire", "PC_Task3", "Questionnaire", "SSQ-Scene"
             };
         }
         // Reset scene index when building order
@@ -275,7 +275,7 @@ public class CoreManager : MonoBehaviour
                 SetTask(taskNum);
         }
         
-        if (nextScene.Contains("SSQ_Scene"))
+        if (nextScene.Contains("SSQ-Scene"))
         {
             incrementSSQ();
         }

@@ -12,6 +12,8 @@ public class QuestionnaireManager : MonoBehaviour
 
     [Header("References")]
     [SerializeField] private QuestionnaireController questionnaireController;
+    [Header("References")]
+    [SerializeField]private SSQPanelController ssqPanelControllerEnding;
 
     private int _currentSequenceIndex; // Tracks progress through the questionnaireSequence list
     private string _sessionParticipantID;
@@ -22,6 +24,7 @@ public class QuestionnaireManager : MonoBehaviour
     private bool _cuePreferenceDoneAfterIndex3; // Triggered when CoreManager index becomes 4
     private bool _cuePreferenceDoneAfterIndex8; // Triggered when CoreManager index becomes 9
     private bool _cuePreferenceDoneAfterIndex13; // Triggered when CoreManager index becomes 14
+    
 
     void Start()
     {
@@ -29,12 +32,12 @@ public class QuestionnaireManager : MonoBehaviour
         if (CoreManager.Instance != null)
         {
             _sessionParticipantID = CoreManager.Instance.GetSessionParticipantID();
-            if (CoreManager.Instance.GetSSQLog() == 0)
+            if (CoreManager.Instance.GetSSQLog() == 0 && SceneManager.GetActiveScene().name == "SSQ-Scene")
             {
                 _currentCondition = "First SSQ";
                 _currentTask = 0;
             }
-            else if (CoreManager.Instance.GetSSQLog() == 1)
+            else if (CoreManager.Instance.GetSSQLog() == 1 && SceneManager.GetActiveScene().name == "SSQ-Scene")
             {
                 _currentCondition = "Second SSQ";
                 _currentTask = 0;
@@ -145,9 +148,7 @@ public class QuestionnaireManager : MonoBehaviour
     {
         if (SceneManager.GetActiveScene().name == "SSQ-Scene")
         {
-            var ssqPanelController = FindFirstObjectByType<SSQPanelController>();
-            
-            ssqPanelController.EnableSSQEnding();
+            ssqPanelControllerEnding.EnableSSQEnding();
 
         }
         else if (CoreManager.Instance != null)

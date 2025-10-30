@@ -113,13 +113,13 @@ TextureImporter:
       name: PoinGIF_0
       rect:
         serializedVersion: 2
-        x: 0
+        x: 33
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1047
+        height: 1036
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -135,13 +135,13 @@ TextureImporter:
       name: PoinGIF_1
       rect:
         serializedVersion: 2
-        x: 1080
+        x: 1110
         y: 1080
-        width: 1080
-        height: 1080
+        width: 1050
+        height: 1059
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -157,13 +157,13 @@ TextureImporter:
       name: PoinGIF_2
       rect:
         serializedVersion: 2
-        x: 0
+        x: 40
         y: 0
-        width: 1080
-        height: 1080
+        width: 1040
+        height: 1052
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
-      border: {x: 26, y: 0, z: 0, w: 28}
+      border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
@@ -179,10 +179,10 @@ TextureImporter:
       name: PoinGIF_3
       rect:
         serializedVersion: 2
-        x: 1080
+        x: 1098
         y: 0
-        width: 1080
-        height: 1080
+        width: 1062
+        height: 1055
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
