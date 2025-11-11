@@ -12,25 +12,25 @@ public class TaskPanel : MonoBehaviour
     public GameObject panelTextsHolder;
     public TextMeshProUGUI interactionStatusText;
     public GameObject panelToHide;
+    
+    public AudioSource ambientAudioSource;
 
     private const float TimerDuration = 5f;
     private TrackingSwitcher _trackingSwitcher;
     private SaberManager _saberManager;
+    
+    private int _currentTask = 0;
 
     private void Start()
     {
+
         string currentCondition = CoreManager.Instance.currentCondition;
-        int currentTask = CoreManager.Instance.currentTask;
+         _currentTask = CoreManager.Instance.currentTask;
         if (interactionStatusText != null) interactionStatusText.gameObject.SetActive(false);
-        if (currentTask == 1)
-        {
-            _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
-            _saberManager = FindFirstObjectByType<SaberManager>();
-        }
 
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Task"))
         {
-            var taskType = currentTask switch
+            var taskType = _currentTask switch
             {
                 1 => "Pointing",
                 2 => "Grabbing",
@@ -45,7 +45,7 @@ public class TaskPanel : MonoBehaviour
                 _ => "Unknown Cue"
             };
 
-            displayText.text = $"TASK {currentTask}: {taskType} ({cueType})";
+            displayText.text = $"TASK {_currentTask}: {taskType} ({cueType})";
         }
         if (panelTextsHolder != null) panelTextsHolder.SetActive(true);
     }
@@ -96,11 +96,28 @@ public class TaskPanel : MonoBehaviour
         }
 
         counterTextHolder.text = "0";
-        if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher != null && _saberManager != null)
+        if (CoreManager.Instance.currentTask == 1)
         {
-            _trackingSwitcher.SwitchToControllersOnly();
-            _saberManager.EnableSabers();
+            _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+            _saberManager = FindFirstObjectByType<SaberManager>();
+
+            if (_trackingSwitcher != null && _saberManager != null)
+            {
+                _trackingSwitcher.SwitchToControllersOnly();
+                _saberManager.EnableSabers();
+            }
         }
+        else
+        {
+            _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+            if (_trackingSwitcher != null) _trackingSwitcher.SwitchToHandsOnly();
+        }
+
+        if (_currentTask == 3)
+        {
+            ambientAudioSource.Play();
+        }
+        
         yield return new WaitForSeconds(1f);
 
         if (displayText!=null)

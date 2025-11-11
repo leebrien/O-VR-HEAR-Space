@@ -21,18 +21,19 @@ public class PanelUIController : MonoBehaviour
     
     private void Start()
     {
+
         _proceedButton = lobbyMenuDesign.transform.Find("rowButtonLayout/proceedButton").GetComponent<Button>();
         _proceedButton.interactable = false;
     }
 
     public void OnPlayTutorialButtonClick()
     {
-        SceneManager.LoadScene("PracticeScene");
+        SceneLoader.LoadScene("PracticeScene");
     }
 
     public void OnCueSelectButtonClick()
     {
-        homeButton.SetActive(true);
+        //homeButton.SetActive(true);
         lobbyMenuDesign.SetActive(false);
         cueSelectDesign.SetActive(true);
         displayText.gameObject.SetActive(true);

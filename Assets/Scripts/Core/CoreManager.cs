@@ -277,7 +277,9 @@ public class CoreManager : MonoBehaviour
         
         if (nextScene.Contains("SSQ-Scene"))
         {
+            Debug.Log("[COREMANAGER BEFORE:]"+ GetSSQLog());
             incrementSSQ();
+            Debug.Log("[COREMANAGER AFTER:]"+ GetSSQLog());
         }
 
 

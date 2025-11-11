@@ -34,11 +34,13 @@ public class QuestionnaireManager : MonoBehaviour
             _sessionParticipantID = CoreManager.Instance.GetSessionParticipantID();
             if (CoreManager.Instance.GetSSQLog() == 0 && SceneManager.GetActiveScene().name == "SSQ-Scene")
             {
+                Debug.Log("[QUESTIONMANAGER DebugLog1 :]"+ CoreManager.Instance.GetSSQLog());
                 _currentCondition = "First SSQ";
                 _currentTask = 0;
             }
             else if (CoreManager.Instance.GetSSQLog() == 1 && SceneManager.GetActiveScene().name == "SSQ-Scene")
             {
+                Debug.Log("[QUESTIONMANAGER DebugLog2 :]"+ CoreManager.Instance.GetSSQLog());
                 _currentCondition = "Second SSQ";
                 _currentTask = 0;
             }
@@ -79,7 +81,7 @@ public class QuestionnaireManager : MonoBehaviour
     {
         if (_currentSequenceIndex >= questionnaireSequence.Count)
         {
-            Debug.Log($"[QuestionnaireManager] Reached end of questionnaire sequence for {_sessionParticipantID}. Loading next scene via CoreManager.");
+            //Debug.Log($"[QuestionnaireManager] Reached end of questionnaire sequence for {_sessionParticipantID}. Loading next scene via CoreManager.");
             ProceedToNextCoreScene();
             return;
         }
@@ -94,7 +96,7 @@ public class QuestionnaireManager : MonoBehaviour
             }
             else
             {
-                Debug.LogError("[QuestionnaireManager] CoreManager instance not found! Cannot check index for CP.");
+                //Debug.LogError("[QuestionnaireManager] CoreManager instance not found! Cannot check index for CP.");
                 //currentSequenceIndex++;
                 StartNextQuestionnaire();
                 return;
@@ -120,12 +122,12 @@ public class QuestionnaireManager : MonoBehaviour
 
             if (runCpNow)
             {
-                Debug.Log($"[QuestionnaireManager] Triggering Cue Preference (CP.json) found at sequence index {_currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}.");
+                //Debug.Log($"[QuestionnaireManager] Triggering Cue Preference (CP.json) found at sequence index {_currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}.");
                 questionnaireController.StartQuestionnaire(nextFile, _sessionParticipantID, _currentCondition , _currentTask);
             }
             else
             {
-                Debug.Log($"[QuestionnaireManager] Skipping Cue Preference (CP.json) found at sequence index {_currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}. Required index 4/9/14 or already done.");
+                //Debug.Log($"[QuestionnaireManager] Skipping Cue Preference (CP.json) found at sequence index {_currentSequenceIndex}. CoreManager index is {coreManagerCurrentIndex}. Required index 4/9/14 or already done.");
                 _currentSequenceIndex++; 
                 StartNextQuestionnaire(); 
                 return;

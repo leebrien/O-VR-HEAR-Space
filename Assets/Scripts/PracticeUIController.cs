@@ -30,9 +30,13 @@ public class PracticeUIManagement : MonoBehaviour
     private void Start()
     {
         _firstLog = practiceSoundManager.GetLoggingStatus();
+        Debug.Log(_firstLog);
+
 
         if (!_firstLog)
         {
+            Debug.LogWarning("PracticeUIManagement: Not my first log - "  + _firstLog);
+            welcomeScreenLayout.SetActive(false);
             _tutorialIndex = 0;
             tutorialPanelGuide1.SetActive(true);
         }
@@ -145,6 +149,7 @@ public class PracticeUIManagement : MonoBehaviour
                     "Awesome! Now we can move on to learning more ways to interact in the VR world.";
                 tutorialPanel.SetActive(true);
                 tutorialReusableGuide.SetActive(true);
+                practiceSoundManager?.GetTrackingSwitcher().SwitchToBoth();
                 nextButton.SetActive(true);
                 break;
             }
@@ -185,7 +190,6 @@ public class PracticeUIManagement : MonoBehaviour
             yield return null;
             waitTimer -= Time.deltaTime;
         }
-        practiceSoundManager?.GetTrackingSwitcher().SwitchToBoth();
         timerBody.SetActive(false);
         tutorialReusableGuide.SetActive(false);
         currentTaskType = 1;
@@ -213,6 +217,7 @@ public class PracticeUIManagement : MonoBehaviour
             waitTimer6 -= Time.deltaTime;
         }
         timerBody.SetActive(false);
+        practiceSoundManager?.GetTrackingSwitcher().SwitchToHandsOnly();
         tutorialReusableGuide.SetActive(false);
         tutorialPanel.SetActive(false);
         currentTaskType = 2;

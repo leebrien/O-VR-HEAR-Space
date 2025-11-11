@@ -26,10 +26,6 @@ public class PracticeSoundManager : MonoBehaviour
     public void Start()
     {
         _firstLog = CoreManager.Instance.GetFirstLog();
-        if (_firstLog)
-        {
-           
-        }
         if (pointingObject!=null) _pointingRenderer = pointingObject.GetComponent<Renderer>();
         if (grabbingObject!=null) _grabbingRenderer = grabbingObject.GetComponent<Renderer>();
         _user = CoreManager.Instance.GetCenterEyeAnchor();
@@ -130,7 +126,7 @@ public class PracticeSoundManager : MonoBehaviour
             saberManager.DisableSabers();
             trackingSwitcher.SwitchToHandsOnly();
         }
-        StartCoroutine(CompleteTaskAfterDelay(1f));
+        StartCoroutine(CompleteTaskAfterDelay(2f));
     }
 
     // delay before compeletion
