@@ -33,6 +33,7 @@ public class QuestionnaireController : MonoBehaviour
     private string currentCondition;
     private int currentTask;
 
+    // set components
     void Awake()
     {
         sliderView = sliderViewGO.GetComponent<SliderView>();
@@ -48,6 +49,7 @@ public class QuestionnaireController : MonoBehaviour
         ToggleGroupView.OnSelectionMade -= HandleSelectionMade;
     }
 
+    // prevents users from clicking forward with no response
     private void HandleSelectionMade()
     {
         if (currentState == QuestionnaireState.ShowingQuestions)
@@ -58,7 +60,7 @@ public class QuestionnaireController : MonoBehaviour
 
     public void StartQuestionnaire(TextAsset jsonFile, string participantID, string condition, int task)
     {
-        
+
         currentParticipantID = participantID;
         currentCondition = condition;
         currentTask = task;
@@ -83,6 +85,7 @@ public class QuestionnaireController : MonoBehaviour
         }
     }
 
+    // title of questionnaires display
     private void DisplayTitleScreen()
     {
         DeactivateAllViews();
@@ -137,7 +140,7 @@ public class QuestionnaireController : MonoBehaviour
         DeactivateAllViews();
         questionnaireUIView.SetInstructionText("");
 
-
+        // checks input UI and sets the necessary text and etc
         if (qData.type == "slider")
         {
             sliderViewGO.SetActive(true);
@@ -168,6 +171,7 @@ public class QuestionnaireController : MonoBehaviour
         }
 
 
+        // reloads response value after back navigation
         if (model.sessionResponses.ContainsKey(qData.id))
         {
             float savedScore = model.sessionResponses[qData.id];
@@ -194,6 +198,7 @@ public class QuestionnaireController : MonoBehaviour
             backButton.onClick.AddListener(OnBackClicked); // Add if active
         }
 
+        // set text depending on index
         forwardButtonText.text = (index == total - 1) ? "Submit" : "Next";
     }
 
@@ -201,11 +206,15 @@ public class QuestionnaireController : MonoBehaviour
     {
         if (isSubmitting) return;
 
+
+        // if coming from title screen
         if (currentState == QuestionnaireState.ShowingTitle)
         {
             currentState = QuestionnaireState.ShowingQuestions;
             DisplayCurrentQuestion();
         }
+
+        // actual question page
         else if (currentState == QuestionnaireState.ShowingQuestions)
         {
             QuestionData qData = model.GetCurrentQuestion();

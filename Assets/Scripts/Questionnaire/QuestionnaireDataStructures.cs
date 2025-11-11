@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 
+// actual value of the question
 [Serializable]
 public class ResponseItem
 {
@@ -14,6 +15,7 @@ public class ResponseItem
     }
 }
 
+// logged time for task completion
 [Serializable]
 public class TaskDurationLog
 {
@@ -27,6 +29,7 @@ public class TaskDurationLog
     }
 }
 
+// questionnaire data
 [Serializable]
 public class QuestionnaireResult
 {
@@ -39,7 +42,7 @@ public class QuestionnaireResult
     public List<ResponseItem> responses = new List<ResponseItem>();
 }
 
-
+// participant data
 [Serializable]
 public class ParticipantData
 {
@@ -48,15 +51,14 @@ public class ParticipantData
     public List<TaskDurationLog> taskDurations = new List<TaskDurationLog>();
 }
 
+// highest level
 [Serializable]
 public class AllResultsData
 {
     public List<ParticipantData> participants = new List<ParticipantData>();
 }
 
-
-
-
+// question data for dynamic changes
 [Serializable]
 public class QuestionData
 {
@@ -73,6 +75,7 @@ public class QuestionData
     public int steps;
 }
 
+// questionnaire schema
 [Serializable]
 public class QuestionnaireData
 {

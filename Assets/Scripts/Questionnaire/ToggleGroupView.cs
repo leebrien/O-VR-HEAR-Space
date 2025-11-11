@@ -34,6 +34,7 @@ public class ToggleGroupView : MonoBehaviour
         }
     }
 
+    // event listenr
     private void OnToggleChanged(bool isOn)
     {
         if (isOn)
@@ -45,20 +46,20 @@ public class ToggleGroupView : MonoBehaviour
     // This UpdateView is for the 7-toggle view
     public void UpdateView(string lowLabel, string highLabel, int steps)
     {
-        // 1. Update semantic labels (if they exist)
+        // set label
         if (hasLabels)
         {
             lowLabelText.text = lowLabel;
             highLabelText.text = highLabel;
         }
 
-        // 2. Activate the correct number of toggles
+        // set visibility
         for (int i = 0; i < toggles.Count; i++)
         {
             toggles[i].gameObject.SetActive(i < steps);
         }
 
-        // 3. Deselect all
+        // untoggle after every response
         if (toggleGroup != null)
         {
             toggleGroup.SetAllTogglesOff(false);
