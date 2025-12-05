@@ -48,7 +48,7 @@ All tasks support both **generic** and **personalized** cues.
 ## License
 This project is for academic research purposes only and adheres to all copyright and licensing requirements for third-party libraries and APIs.
 
-## 👥 Authors
+## Authors
 
 **O-VR Hear Team**  
 - Ram David M. Brodett  
