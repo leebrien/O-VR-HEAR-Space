@@ -132,7 +132,7 @@ public class QuestionnaireModel : MonoBehaviour
         if (CoreManager.Instance != null)
         {
             // Get the dictionary from CoreManager
-            Dictionary<string, float> coreTaskDurations = CoreManager.Instance.GetTaskDurations();
+            Dictionary<string, string> coreTaskDurations = CoreManager.Instance.GetTaskResults();
 
             // Convert the dictionary to the serializable List<TaskDurationLog>
             // This overwrites the old list which ensures that it's always up-to-date

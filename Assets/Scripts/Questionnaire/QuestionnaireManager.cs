@@ -1,9 +1,5 @@
 using UnityEngine;
 using System.Collections.Generic;
-using System.IO;
-using System;
-using System.Linq;
-using UnityEngine.SceneManagement;
 
 public class QuestionnaireManager : MonoBehaviour
 {
@@ -13,12 +9,12 @@ public class QuestionnaireManager : MonoBehaviour
     [Header("References")]
     [SerializeField] private QuestionnaireController questionnaireController;
     [Header("References")]
-    [SerializeField]private SSQPanelController ssqPanelControllerEnding;
 
     private int _currentSequenceIndex; // Tracks progress through the questionnaireSequence list
     private string _sessionParticipantID;
     private string _currentCondition;
     private int _currentTask;
+    private int _currentSceneIndex;
 
     // Flags to ensure Cue Preference runs only once per task pair trigger point
     private bool _cuePreferenceDoneAfterIndex3; // Triggered when CoreManager index becomes 4
@@ -32,24 +28,10 @@ public class QuestionnaireManager : MonoBehaviour
         if (CoreManager.Instance != null)
         {
             _sessionParticipantID = CoreManager.Instance.GetSessionParticipantID();
-            if (CoreManager.Instance.GetSSQLog() == 0 && SceneManager.GetActiveScene().name == "SSQ-Scene")
-            {
-                Debug.Log("[QUESTIONMANAGER DebugLog1 :]"+ CoreManager.Instance.GetSSQLog());
-                _currentCondition = "First SSQ";
-                _currentTask = 0;
-            }
-            else if (CoreManager.Instance.GetSSQLog() == 1 && SceneManager.GetActiveScene().name == "SSQ-Scene")
-            {
-                Debug.Log("[QUESTIONMANAGER DebugLog2 :]"+ CoreManager.Instance.GetSSQLog());
-                _currentCondition = "Second SSQ";
-                _currentTask = 0;
-            }
-            else
-            {
-                _currentCondition = CoreManager.Instance.GetCurrentCondition();
-                _currentTask = CoreManager.Instance.GetCurrentTask();
-            }
-
+            _currentCondition = CoreManager.Instance.GetCurrentCondition();
+            _currentTask = CoreManager.Instance.GetCurrentTask();
+            _currentSceneIndex = CoreManager.Instance.GetCurrentSceneIndex();
+            
             Debug.Log($"[QuestionnaireManager] Using Participant ID: {_sessionParticipantID}");
         }
         else
@@ -114,7 +96,7 @@ public class QuestionnaireManager : MonoBehaviour
                 runCpNow = true;
                 _cuePreferenceDoneAfterIndex8 = true;
             }
-            else if (coreManagerCurrentIndex == 14 && !_cuePreferenceDoneAfterIndex13)
+            else if (coreManagerCurrentIndex == 13 && !_cuePreferenceDoneAfterIndex13)
             {
                 runCpNow = true;
                 _cuePreferenceDoneAfterIndex13 = true;
@@ -148,12 +130,7 @@ public class QuestionnaireManager : MonoBehaviour
     // Helper function to call CoreManager's LoadNextScene safely
     private void ProceedToNextCoreScene()
     {
-        if (SceneManager.GetActiveScene().name == "SSQ-Scene")
-        {
-            ssqPanelControllerEnding.EnableSSQEnding();
-
-        }
-        else if (CoreManager.Instance != null)
+        if (CoreManager.Instance != null)
         {
             CoreManager.Instance.LoadNextScene();
         }

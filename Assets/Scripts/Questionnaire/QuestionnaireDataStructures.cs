@@ -20,12 +20,12 @@ public class ResponseItem
 public class TaskDurationLog
 {
     public string taskIdentifier;
-    public float duration;
+    public string resultData; 
 
-    public TaskDurationLog(string id, float dur)
+    public TaskDurationLog(string id, string data)
     {
         taskIdentifier = id;
-        duration = dur;
+        resultData = data;
     }
 }
 

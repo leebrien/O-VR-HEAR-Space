@@ -14,20 +14,20 @@ public class CoreManager : MonoBehaviour
     public string currentCondition;
     public int currentTask;
 
-    private string sessionParticipantID;
+    private string _sessionParticipantID;
 
     private int _currentIndex;
     private string[] _sceneOrder;
 
     private float _taskStartTime;
     private string _runningTaskIdentifier = string.Empty;
-    private Dictionary<string, float> _taskDurations;
-
+    //private Dictionary<string, float> _taskDurations;
+    private Dictionary<string, string> _taskResults;
+    
     private bool _isTransitioning;
     private bool _rigReferencesSet;
 
     public bool firstLog = true;
-    private int _SSQLog;
 
     private GameObject _ovrRig;
     private GameObject _ovrHands;
@@ -47,7 +47,8 @@ public class CoreManager : MonoBehaviour
     public GameObject GetLeftSaber() => _leftSaber;
     public GameObject GetRightSaber() => _rightSaber;
     public Transform GetCenterEyeAnchor() => _centerEyeAnchor;
-    public string GetSessionParticipantID() => sessionParticipantID;
+    public string GetSessionParticipantID() => _sessionParticipantID;
+    
 
 
     private PracticeSoundManager _soundManager;
@@ -80,11 +81,6 @@ public class CoreManager : MonoBehaviour
         _rigReferencesSet = true;
     }
 
-    private void Start()
-    {
-        SceneManager.LoadScene(firstLog ? "PracticeScene" : "LobbyScene");
-    }
-
 
     public void SetFirstLog(bool value)
     {
@@ -98,18 +94,23 @@ public class CoreManager : MonoBehaviour
 
     }
 
+    private void Start()
+    {
+        SceneManager.LoadScene("PracticeScene");
+    }
+
     private void Awake()
     {
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            _taskDurations = new Dictionary<string, float>();
+            _taskResults = new Dictionary<string, string>();
             SceneManager.sceneLoaded += OnSceneLoaded;
 
             // Calculate participant ID once on Awake
-            sessionParticipantID = CalculateNextParticipantID();
-            Debug.Log($"[CoreManager] Session started for Participant ID: {sessionParticipantID}");
+            _sessionParticipantID = CalculateNextParticipantID();
+            Debug.Log($"[CoreManager] Session started for Participant ID: {_sessionParticipantID}");
         }
         else
         {
@@ -164,34 +165,47 @@ public class CoreManager : MonoBehaviour
     private void SetCondition(string condition) => currentCondition = condition;
     private void SetTask(int task) => currentTask = task;
 
-    public void SetStartingCondition(string condition)
+    public void GenerateProtolSceneSequence(string setID)
     {
-        SetCondition(condition);
-        BuildSceneOrder();
+        BuildSceneOrder(setID);
+        SceneLoader.LoadScene("LobbyScene");
     }
 
-    private void BuildSceneOrder()
+    private void BuildSceneOrder(string setID)
     {
-        if (currentCondition == "PC")
+        string[] rawTasks = GetTaskSequence(setID);
+        List<string> protocolSequence = new List<string>();
+
+        for (int i = 0; i < rawTasks.Length; i++)
         {
-            _sceneOrder = new[]
-            {
-                "PC_Task1", "Questionnaire", "GC_Task1", "Questionnaire", "Break",
-                "PC_Task2", "Questionnaire", "GC_Task2", "Questionnaire", "Break",
-                "PC_Task3", "Questionnaire", "GC_Task3", "Questionnaire", "SSQ-Scene"
-            };
+            protocolSequence.Add(rawTasks[i]);
+            protocolSequence.Add("Questionnaire");
+            if (i == 2) protocolSequence.Add("Break");
         }
-        else if (currentCondition == "GC")
-        {
-            _sceneOrder = new[]
-            {
-                "GC_Task1", "Questionnaire", "PC_Task1", "Questionnaire", "Break",
-                "GC_Task2", "Questionnaire", "PC_Task2", "Questionnaire", "Break",
-                "GC_Task3", "Questionnaire", "PC_Task3", "Questionnaire", "SSQ-Scene"
-            };
-        }
-        // Reset scene index when building order
+        _sceneOrder = protocolSequence.ToArray();
         _currentIndex = 0;
+        print( " Protocol Order"  + " " + _sceneOrder);
+    }
+
+    private string[] GetTaskSequence(string setID)
+    {
+        switch (setID)
+        {
+            case "1":
+                return new[] {"GC_Task1", "PC_Task1", "GC_Task2", "PC_Task2", "GC_Task3", "PC_Task3"};
+            case "2":
+                return new[] {"PC_Task1", "GC_Task1", "PC_Task2", "GC_Task2", "PC_Task3", "GC_Task3"};
+            case "3":
+                return new[] { "GC_Task2", "PC_Task2", "GC_Task3", "PC_Task3", "GC_Task1", "PC_Task1" };
+            case "4":
+                return new[] { "PC_Task2", "GC_Task2", "PC_Task3", "GC_Task3", "PC_Task1", "GC_Task1" };
+            case "5":
+                return new[] { "GC_Task3", "PC_Task3", "GC_Task1", "PC_Task1", "GC_Task2", "PC_Task2" };
+            case "6":
+                return new[] { "PC_Task3", "GC_Task3", "PC_Task1", "GC_Task1", "PC_Task2", "GC_Task2" };
+            default:
+                return null;
+        }
     }
 
     public void StartCurrentTaskTime()
@@ -202,7 +216,7 @@ public class CoreManager : MonoBehaviour
         Debug.Log($"[CoreManager] Started timing for: {taskIdentifier} at {Time.time:F2}s");
     }
 
-    public void StopAndLogCurrentTaskTime()
+    public void StopAndLogCurrentTaskTime(bool isSuccess)
     {
         if (!string.IsNullOrEmpty(_runningTaskIdentifier) && _taskStartTime > 0f)
         {
@@ -210,20 +224,22 @@ public class CoreManager : MonoBehaviour
             int completedSceneIndex = _currentIndex;
             string uniqueLogKey = $"{_runningTaskIdentifier}_Run_End_Index_{completedSceneIndex}";
 
+            string statusString = isSuccess ? "Success" : "Failed";
+            string logValue = $"{duration:F2} | {statusString}";
+
             try
             {
-                if (!_taskDurations.ContainsKey(uniqueLogKey))
+                if (!_taskResults.ContainsKey(uniqueLogKey))
                 {
-                    _taskDurations.Add(uniqueLogKey, duration);
-                    Debug.Log($"[CoreManager] TASK COMPLETED: {uniqueLogKey} = {duration:F2}s");
+                    _taskResults.Add(uniqueLogKey, logValue);
+                    Debug.Log($"[CoreManager] TASK ENDED: {uniqueLogKey} = {logValue}");
                 }
                 else
                 {
                     Debug.LogWarning($"[CoreManager] Attempted to log duplicate key: {uniqueLogKey}. Ignoring.");
                 }
-
             }
-            catch (System.ArgumentException e)
+            catch (ArgumentException e)
             {
                 Debug.LogError($"[CoreManager] Error adding log key: {e.Message}");
             }
@@ -232,14 +248,15 @@ public class CoreManager : MonoBehaviour
             _runningTaskIdentifier = string.Empty;
         }
     }
+    
 
     public void PrintAllTaskTimes()
     {
         Debug.Log("===========================================");
         Debug.Log("[CoreManager] --- FINAL TASK TIME LOG ---");
-        Debug.Log($"Total Logged Entries: {_taskDurations.Count}");
-        foreach (var entry in _taskDurations.OrderBy(kvp => kvp.Key))
-            Debug.Log($"Task: {entry.Key}, Duration: {entry.Value:F2}s");
+        Debug.Log($"Total Logged Entries: {_taskResults.Count}");
+        foreach (var entry in _taskResults.OrderBy(kvp => kvp.Key))
+            Debug.Log($"ID: {entry.Key} | Data: {entry.Value}");
         Debug.Log("===========================================");
     }
 
@@ -273,13 +290,6 @@ public class CoreManager : MonoBehaviour
             SetCondition("GC");
             if (int.TryParse(nextScene.Replace("GC_Task", ""), out int taskNum))
                 SetTask(taskNum);
-        }
-        
-        if (nextScene.Contains("SSQ-Scene"))
-        {
-            Debug.Log("[COREMANAGER BEFORE:]"+ GetSSQLog());
-            incrementSSQ();
-            Debug.Log("[COREMANAGER AFTER:]"+ GetSSQLog());
         }
 
 
@@ -350,7 +360,7 @@ public class CoreManager : MonoBehaviour
     public int GetCurrentTask() => currentTask;
 
     public int GetCurrentSceneIndex() => _currentIndex;
-    public Dictionary<string, float> GetTaskDurations() => _taskDurations;
+    public Dictionary<string, string> GetTaskResults() => _taskResults;
 
 
     // Participant ID calculation
@@ -388,12 +398,5 @@ public class CoreManager : MonoBehaviour
         return $"P{nextParticipantNumber:D3}";
     }
     
-    public void incrementSSQ()
-    {
-        _SSQLog++;
-    }
-    public int GetSSQLog()
-    {
-        return _SSQLog;
-    }
+
 }

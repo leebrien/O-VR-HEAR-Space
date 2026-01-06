@@ -96,6 +96,7 @@ public class TaskPanel : MonoBehaviour
         }
 
         counterTextHolder.text = "0";
+        
         if (CoreManager.Instance.currentTask == 1)
         {
             _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
@@ -133,6 +134,16 @@ public class TaskPanel : MonoBehaviour
             {
                 SoundManager.Instance.PlaySound();
                 CoreManager.Instance.StartCurrentTaskTime();
+            }
+            
+            TaskInteraction taskInteraction = FindFirstObjectByType<TaskInteraction>();
+            if (taskInteraction != null)
+            {
+                taskInteraction.ActivateTaskTimer();
+            }
+            else
+            {
+                Debug.Log("No task interaction found");
             }
         }
     }

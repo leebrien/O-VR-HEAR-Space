@@ -5,6 +5,7 @@ using TMPro;
 public class TaskInteraction : MonoBehaviour
 {
     public Material successMaterial;
+    public Material failureMaterial;
     public TaskPanel taskPanel;
     public GameObject[] environmentObjects;
     public GameObject proceedButton;
@@ -19,34 +20,80 @@ public class TaskInteraction : MonoBehaviour
     private SaberManager _saberManager;
 
     private string _sceneName;
-
-    // Flag to ensure OnSuccess runs only once per task completion
     private bool _isTaskCompleted;
+
+    private float _timeLimit;
+    private float _localStartTime;
+    private bool _isTimerRunning = false;
 
     private void Start()
     {
         _isTaskCompleted = false;
+        _isTimerRunning = false;
+        int currentTask = CoreManager.Instance != null ? CoreManager.Instance.currentTask : 1;
+        
+        if (currentTask == 3) _timeLimit = 600f; 
+        else _timeLimit = 300f;
+        Debug.Log($"[TaskInteraction] Timer started. Limit: {_timeLimit} seconds.");
+    }
+    
+    void Update()
+    {
+        if (!_isTimerRunning || _isTaskCompleted) return;
+
+        float elapsed = Time.time - _localStartTime;
+        if (elapsed >= _timeLimit)
+        {
+            OnFailure();
+        }
+    }
+    
+    public void OnFailure()
+    {
+        if (_isTaskCompleted) return;
+        _isTaskCompleted = true;
+        _isTimerRunning = false;
+
+        Debug.Log("[TaskInteraction] Time limit reached! Task Failed.");
+        
+        SetMeshMaterial(failureMaterial);
+        
+        CoreManager manager = CoreManager.Instance;
+        if (manager != null)
+        {
+            manager.StopAndLogCurrentTaskTime(false); // false = Failed
+        }
+        
+        CleanUpAndShowPanel(false); 
     }
 
+    public void ActivateTaskTimer()
+    {
+        _localStartTime = Time.time;
+        _isTimerRunning = true;
+    }
+    
     // ReSharper disable Unity.PerformanceAnalysis
     public void OnSuccess()
     {
-        //Debug.Log("Entered On Success");
-        // Guard clause
         if (_isTaskCompleted) return;
         _isTaskCompleted = true;
-        
-        CoreManager manager = CoreManager.Instance;
-        SoundManager soundManager = SoundManager.Instance;
-
-        //Debug.Log("HIT HIT HIT!");
+        _isTimerRunning = false;
         
         SetMeshMaterial(successMaterial);
-
+        CoreManager manager = CoreManager.Instance;
         if (manager != null)
         {
-            CoreManager.Instance.StopAndLogCurrentTaskTime();
+            manager.StopAndLogCurrentTaskTime(true);
         }
+        
+        CleanUpAndShowPanel(true);
+    }
+
+    private void CleanUpAndShowPanel(bool isSuccess)
+    {
+        CoreManager manager = CoreManager.Instance;
+        SoundManager soundManager = SoundManager.Instance;
         
         // Stop sound
         if (taskPanel!= null && soundManager != null && !taskPanel.panelToHide.activeSelf)
@@ -56,17 +103,15 @@ public class TaskInteraction : MonoBehaviour
         
         if (manager.currentTask == 1)
         {
-            // Find the objects right before we use them
             _saberManager = FindFirstObjectByType<SaberManager>();
             if (_saberManager != null) 
             {
                 _saberManager.DisableSabers();
             }
-            
         }
         
         if (manager.currentTask == 3 && ambientAudioSource != null)
-                ambientAudioSource.Stop();
+            ambientAudioSource.Stop();
         
         _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
         if (_trackingSwitcher != null)
@@ -74,35 +119,28 @@ public class TaskInteraction : MonoBehaviour
             _trackingSwitcher.SwitchToBoth();
         }
             
-        StartCoroutine(ShowPanelAfterDelay());
+        StartCoroutine(ShowPanelAfterDelay(isSuccess));
     }
     
-    private IEnumerator ShowPanelAfterDelay()
+    
+    private IEnumerator ShowPanelAfterDelay(bool isSuccess)
     {
-        // 1. Wait for 2 seconds
         yield return new WaitForSeconds(2.0f);
 
-        // 2. Hide the audio object
         if (AudioGameObject != null)
         {
             AudioGameObject.SetActive(false);
         }
 
-        // 3. Now, show the panel and set up all its text
         if (taskPanel != null && !taskPanel.panelToHide.activeSelf)
         {
             taskPanel.ShowPanel();
 
-            if (proceedButton != null)
-            {
-                proceedButton.SetActive(true);
-            }
-
+            if (proceedButton != null) proceedButton.SetActive(true);
             if (displayText != null)
             {
                 displayText.gameObject.SetActive(true);
 
-                // We get the manager instance here, inside the coroutine
                 var manager = CoreManager.Instance; 
                 var currentCondition = manager.currentCondition;
                 var currentTask = manager.currentTask;
@@ -122,8 +160,11 @@ public class TaskInteraction : MonoBehaviour
                     _ => "Unknown Cue"
                 };
 
+                // Update text based on success or failure
+                string statusMsg = isSuccess ? "Task Completed! You may proceed." : "Time Limit Reached. You may proceed.";
+                
                 displayText.text = $"TASK {currentTask}: {taskType} ({cueType})";
-                interactionStatusText.text = "Status: Task Completed! You may proceed.";
+                interactionStatusText.text = $"Status: {statusMsg}";
                 interactionStatusText.gameObject.SetActive(true);
             }
         }

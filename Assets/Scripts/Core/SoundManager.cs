@@ -6,8 +6,7 @@ using Random = UnityEngine.Random;
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance;
-    private Transform _user; //User reference, eye anchor center
-    //public GameObject audioObject; // Direct reference to the object in the hierarchy
+    private Transform _user; 
     public AudioClip genericCue;
     public AudioClip hearsonaCue;
     private readonly Vector3 _roomSize = new Vector3(8.0f, 2.5f, 8.0f);
@@ -48,13 +47,6 @@ public class SoundManager : MonoBehaviour
         }
         
         _user = CoreManager.Instance.GetCenterEyeAnchor();
-        //audioObject = GameObject.FindGameObjectWithTag("CueSource");
-        
-        //if (audioObject != null) 
-            //_audioSource = audioObject.GetComponent<AudioSource>();
-        
-        //if (_audioSource == null)
-            //Debug.LogWarning("No AudioSource found in scene: " + scene.name);
     }
     
     public void RegisterSceneAudioSource(AudioSource source)
@@ -70,13 +62,6 @@ public class SoundManager : MonoBehaviour
     public void PlaySound()
     {
         
-        
-        //if (_user == null || genericCue == null || audioObject == null || hearsonaCue == null)
-        //{
-            //Debug.LogWarning("User, soundClip, or audioObject not assigned!");
-           // return;
-        //}
-        
         if (_user == null && CoreManager.Instance != null)
         {
             _user = CoreManager.Instance.GetCenterEyeAnchor();
@@ -89,17 +74,17 @@ public class SoundManager : MonoBehaviour
             return;
         }
 
-        if (/*_audioSource*/_currentSceneAudioSource != null)
+        if (_currentSceneAudioSource != null)
         {
-            /*_audioSource*/_currentSceneAudioSource.Stop();
+            _currentSceneAudioSource.Stop();
         }
 
         _soundPosition = _user.position;
         GenerateSoundPosition(ref _soundPosition);
 
-        // Position the existing audio object
-        /*audioObject*/_currentSceneAudioSource.transform.position = _soundPosition;
-        /*audioObject*/_currentSceneAudioSource.gameObject.SetActive(true);
+       
+        _currentSceneAudioSource.transform.position = _soundPosition;
+        _currentSceneAudioSource.gameObject.SetActive(true);
         
         
         if (CoreManager.Instance == null)
@@ -128,13 +113,12 @@ public class SoundManager : MonoBehaviour
 
     public void StopSound()
     {
-        if (/*_audioSource*/_currentSceneAudioSource != null)
+        if (_currentSceneAudioSource != null)
         {
-            /*_audioSource*/_currentSceneAudioSource.Stop();
-            /*_audioSource*/_currentSceneAudioSource.enabled = false;
+            _currentSceneAudioSource.Stop();
+            _currentSceneAudioSource.enabled = false;
         }
-
-        // Add this
+        
         if (_playCoroutine != null)
         {
             StopCoroutine(_playCoroutine);
@@ -149,10 +133,10 @@ public class SoundManager : MonoBehaviour
             StopCoroutine(_playCoroutine);
         }
         
-        /*_audioSource*/_currentSceneAudioSource.clip = clip;
-        /*_audioSource*/_currentSceneAudioSource.spatialBlend = 1.0f;
-        /*_audioSource*/_currentSceneAudioSource.playOnAwake = false;
-        /*_audioSource*/_currentSceneAudioSource.loop = false;
+        _currentSceneAudioSource.clip = clip;
+        _currentSceneAudioSource.spatialBlend = 1.0f;
+        _currentSceneAudioSource.playOnAwake = false;
+        _currentSceneAudioSource.loop = false;
 
         _playCoroutine = StartCoroutine(PlayWithDelay(1.5f));
     }
@@ -161,8 +145,8 @@ public class SoundManager : MonoBehaviour
     {
         while (true)
         {
-            /*_audioSource*/_currentSceneAudioSource.Play();
-            yield return new WaitForSeconds(/*_audioSource*/_currentSceneAudioSource.clip.length + delay);
+            _currentSceneAudioSource.Play();
+            yield return new WaitForSeconds(_currentSceneAudioSource.clip.length + delay);
         }
     }
 
@@ -189,9 +173,10 @@ public class SoundManager : MonoBehaviour
         else if (taskType == 2 || taskType == 3)
         {
             int direction = Random.Range(0, 8);
-            //float offset = Random.Range(1.75f, 2.50f);
-            float[] allowedoffsets = { 0.75f, 1f, 1.25f };
-            float offset = allowedoffsets[Random.Range(0, allowedoffsets.Length)];
+            float offset = Random.Range(1.75f, 3.25f);
+            //For testing offsets to allow searching in small spaces
+            //float[] allowedoffsets = { 0.75f, 1f, 1.25f };
+            //float offset = allowedoffsets[Random.Range(0, allowedoffsets.Length)];
 
             switch (direction)
             {

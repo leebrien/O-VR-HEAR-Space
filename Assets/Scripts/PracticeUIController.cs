@@ -1,16 +1,15 @@
 using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
 public class PracticeUIManagement : MonoBehaviour
 {
-    public GameObject welcomeScreenLayout;
     public GameObject tutorialPanelGuide1;
     public GameObject tutorialPanelGuide2;
     public GameObject tutorialPanelGuide3;
     public GameObject tutorialPanelGuide4;
     public GameObject tutorialReusableGuide;
+    public GameObject protocolSequencePanel;
     public GameObject timerBody;
     public TextMeshProUGUI timerText;
     public GameObject nextButton;
@@ -19,10 +18,10 @@ public class PracticeUIManagement : MonoBehaviour
     public GameObject tutorialPanel;
 
     private bool _firstLog;
-    private int currentTaskType = 0;
+    private int _currentTaskType;
 
     public PracticeSoundManager practiceSoundManager;
-    private int _tutorialIndex = 0;
+    private int _tutorialIndex;
 
     private TextMeshProUGUI _welcomeText;
     private Coroutine _tutorialCoroutine;
@@ -33,23 +32,39 @@ public class PracticeUIManagement : MonoBehaviour
         Debug.Log(_firstLog);
 
 
-        if (!_firstLog)
+        if (_firstLog)
         {
-            Debug.LogWarning("PracticeUIManagement: Not my first log - "  + _firstLog);
-            welcomeScreenLayout.SetActive(false);
+            Debug.LogWarning("PracticeUIManagement: My first log - "  + _firstLog);
             _tutorialIndex = 0;
-            tutorialPanelGuide1.SetActive(true);
+            _tutorialIndex = 0;
+            StartTutorialCoroutine(InitialTutorial());
         }
         else
         {
-            if (welcomeScreenLayout != null)
-            {
-                var titleObj = welcomeScreenLayout.transform.Find("welcomeInstructionTitle");
-                if (titleObj)
-                    _welcomeText = titleObj.GetComponent<TextMeshProUGUI>();
-            }
-            StartTutorialCoroutine(ShowTutorialPanelWithDelay());
+            tutorialPanelGuide1.SetActive(false);
+            protocolSequencePanel.SetActive(true);
+            practiceSoundManager?.GetTrackingSwitcher().SwitchToBoth();
         }
+    }
+
+    private IEnumerator InitialTutorial()
+    {
+        timerBody.SetActive(true);
+        float timeDelay = 8f;
+        float timer = timeDelay;
+        while (timer > 0f)
+        {
+            timerText.text = $"{Mathf.CeilToInt(timer)}s";
+            yield return null;
+            timer -= Time.deltaTime;
+        }
+        tutorialPanelGuide1.SetActive(false);
+        timerBody.SetActive(false);
+        CoreManager.Instance.SetFirstLog(false);
+        practiceSoundManager?.GetTrackingSwitcher().SwitchToHandsOnly();
+        _tutorialCoroutine = null;
+        LoadNextTutorial();
+        
     }
 
     private void OnDisable()
@@ -78,42 +93,6 @@ public class PracticeUIManagement : MonoBehaviour
         }
     }
 
-    private IEnumerator ShowTutorialPanelWithDelay()
-    {
-        float timeDelay = 6f;
-        float timer = timeDelay;
-        while (timer > 0f)
-        {
-            if (_welcomeText)
-                _welcomeText.text = $"The VR environment tutorial will begin shortly in {Mathf.CeilToInt(timer)}s.";
-            yield return null;
-            timer -= Time.deltaTime;
-        }
-
-        welcomeScreenLayout.SetActive(false);
-        tutorialPanelGuide1.SetActive(true);
-        timerBody.SetActive(true);
-
-        timer = 8f;
-        while (timer > 0f)
-        {
-            timerText.text = $"{Mathf.CeilToInt(timer)}s";
-            yield return null;
-            timer -= Time.deltaTime;
-        }
-
-        timerBody.SetActive(false);
-        tutorialPanelGuide1.SetActive(false);
-        CoreManager.Instance.SetFirstLog(false);
-        practiceSoundManager?.GetTrackingSwitcher().SwitchToHandsOnly();
-
-        // Mark this coroutine finished before calling the void method
-        _tutorialCoroutine = null;
-
-        // Call the void loader
-        LoadNextTutorial();
-    }
-
     public void LoadNextTutorial()
     {
         _tutorialIndex++;
@@ -137,7 +116,6 @@ public class PracticeUIManagement : MonoBehaviour
 
             case 3:
             {
-                // long-wait step -> start dedicated coroutine
                 StartTutorialCoroutine(TutorialStep3Routine());
                 break;
             }
@@ -192,8 +170,8 @@ public class PracticeUIManagement : MonoBehaviour
         }
         timerBody.SetActive(false);
         tutorialReusableGuide.SetActive(false);
-        currentTaskType = 1;
-        practiceSoundManager?.PlayObject(currentTaskType);
+        _currentTaskType = 1;
+        practiceSoundManager?.PlayObject(_currentTaskType);
         tutorialPanel.SetActive(false);
 
         // mark coroutine finished
@@ -220,8 +198,8 @@ public class PracticeUIManagement : MonoBehaviour
         practiceSoundManager?.GetTrackingSwitcher().SwitchToHandsOnly();
         tutorialReusableGuide.SetActive(false);
         tutorialPanel.SetActive(false);
-        currentTaskType = 2;
-        practiceSoundManager?.PlayObject(currentTaskType);
+        _currentTaskType = 2;
+        practiceSoundManager?.PlayObject(_currentTaskType);
 
         _tutorialCoroutine = null;
     }
@@ -231,7 +209,7 @@ public class PracticeUIManagement : MonoBehaviour
         
         tutorialTitle.text = "Nicely done!";
         tutorialInstructions.text =
-            "You’ve completed the tutorial. Before proceeding we need you to answer a simulation sickness test first. " +
+            "You’ve completed the tutorial. You need to select the SET assigned to you. " +
             "You'll be redirected in a moment.";
         tutorialPanel.SetActive(true);
         tutorialReusableGuide.SetActive(true);
@@ -246,14 +224,17 @@ public class PracticeUIManagement : MonoBehaviour
 
         _tutorialCoroutine = null;
         // navigate away
-        SceneLoader.LoadScene("SSQ-Scene");
+        //SceneLoader.LoadScene("LobbyScene");
         
+        timerBody.SetActive(false);
+        tutorialReusableGuide.SetActive(false);
+        protocolSequencePanel.SetActive(true);
     }
 
-    public void OnHomeButtonClick()
-    {
-        SceneLoader.LoadScene("LobbyScene");
-    }
+    //public void OnHomeButtonClick()
+    //{
+     //   SceneLoader.LoadScene("LobbyScene");
+    //}
 
     // ReSharper disable Unity.PerformanceAnalysis
     public void OnTaskComplete()
@@ -264,5 +245,17 @@ public class PracticeUIManagement : MonoBehaviour
 
         // advance synchronously (helper coroutines will run where needed)
         LoadNextTutorial();
+    }
+
+    public void SelectSet(string setID)
+    {
+        if (CoreManager.Instance != null)
+        {
+            CoreManager.Instance.GenerateProtolSceneSequence(setID);
+        }
+        else
+        {
+            Debug.LogError("CoreManager Instance not found! Did you start from Bootstrap?");
+        }
     }
 }
