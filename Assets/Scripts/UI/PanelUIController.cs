@@ -1,55 +1,36 @@
-using System.Collections;
 using TMPro;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 public class PanelUIController : MonoBehaviour
 {
     public GameObject lobbyMenuDesign;
-    public GameObject cueSelectDesign;
     public GameObject hearsonaCueDownloadDesign;
-    public GameObject preparationDesign;
     public GameObject homeButton;
-    public TextMeshProUGUI displayText;
     public SoundPolling soundPolling;
     
     private string _selectedCondition;
     private Button _proceedButton;
-    private bool _cancellPolling = false;
+    private bool _cancelPolling;
     
     
     private void Start()
     {
+
         _proceedButton = lobbyMenuDesign.transform.Find("rowButtonLayout/proceedButton").GetComponent<Button>();
-        _proceedButton.interactable = true;
+        _proceedButton.interactable = false;
     }
+    
 
-    public void OnPlayTutorialButtonClick()
-    {
-        SceneManager.LoadScene("PracticeScene");
-    }
-
-    public void OnCueSelectButtonClick()
-    {
-        homeButton.SetActive(true);
-        lobbyMenuDesign.SetActive(false);
-        cueSelectDesign.SetActive(true);
-        displayText.gameObject.SetActive(true);
-    }
     
     public void OnImportButtonClick()
     {
-        
         var pollTitleTMP = hearsonaCueDownloadDesign.transform.Find("pollTitle").GetComponent<TextMeshProUGUI>();
         var hintTitleTMP = hearsonaCueDownloadDesign.transform.Find("hintTitle").GetComponent<TextMeshProUGUI>();
         var doneButtonPoll = hearsonaCueDownloadDesign.transform.Find("doneButton").GetComponent<Button>();
         
-        _cancellPolling = false;
+        _cancelPolling = false;
         _proceedButton.interactable = false;
-        
-        homeButton.SetActive(true);
-        displayText.gameObject.SetActive(false);
         lobbyMenuDesign.SetActive(false);
         
         pollTitleTMP.text = "Retrieving personalized cue from Hearsona";
@@ -58,7 +39,7 @@ public class PanelUIController : MonoBehaviour
         hearsonaCueDownloadDesign.SetActive(true);
         hearsonaCueDownloadDesign.transform.Find("Spinner").gameObject.SetActive(true);
         
-        StartCoroutine(soundPolling.PollAudio(()=> _cancellPolling, success =>
+        StartCoroutine(soundPolling.PollAudio(()=> _cancelPolling, success =>
         {
             if (success)
             {
@@ -73,64 +54,26 @@ public class PanelUIController : MonoBehaviour
             {
                 pollTitleTMP.text = "Failed to retrieve cue!";
                 hintTitleTMP.text = "Please try again later.";
+                homeButton.SetActive(true);
             }
         }));
     }
-
-    public void OnGenericButtonClick()
-    {
-        displayText.text = "Selected starting cue: Generic.";
-        _selectedCondition = "GC";
-        cueSelectDesign.SetActive(false);
-        preparationDesign.SetActive(true);
-        displayText.gameObject.SetActive(true);
-        
-    }
-
-    public void OnPersonalizedButtonClick()
-    {
-        displayText.text = "Selected starting cue: Personalized.";
-        _selectedCondition = "PC";
-
-        cueSelectDesign.SetActive(false);
-        preparationDesign.SetActive(true);
-        displayText.gameObject.SetActive(true);
-    }
+    
+    
 
     public void OnProceedClick()
     {
-        if (string.IsNullOrEmpty(_selectedCondition))
-        {
-            Debug.LogWarning("No condition selected. Cannot proceed.");
-            return;
-        }
-
-        CoreManager.Instance.SetStartingCondition(_selectedCondition);
+        //CoreManager.Instance.SetStartingCondition(_selectedCondition);
+        // Set the protocol sequence
         CoreManager.Instance.LoadNextScene();
     }
-    
 
-    public void OnReturnClick()
+    public void OnHomeButtonClick()
     {
-        displayText.text = "Please select the starting type of cue randomly assigned to you by the researchers.";
-        _selectedCondition = null; 
-        preparationDesign.SetActive(false);
-        cueSelectDesign.SetActive(true);
+        homeButton.SetActive(false);
+        hearsonaCueDownloadDesign.SetActive(false);
+        lobbyMenuDesign.SetActive(true);
+        
     }
     
-    public void OnHomeButtonClick(bool donePolling = false)
-    {
-        if (donePolling)
-        {
-            var doneButtonPoll = hearsonaCueDownloadDesign.transform.Find("doneButton").GetComponent<Button>();
-            doneButtonPoll.gameObject.SetActive(false);
-        }
-        
-        homeButton.SetActive(false);
-        if (preparationDesign.activeInHierarchy) preparationDesign.SetActive(false);
-        if (cueSelectDesign.activeInHierarchy) cueSelectDesign.SetActive(false);
-        if (hearsonaCueDownloadDesign.activeInHierarchy) hearsonaCueDownloadDesign.SetActive(false);
-        displayText.gameObject.SetActive(false);
-        lobbyMenuDesign.SetActive(true);
-    }
 }

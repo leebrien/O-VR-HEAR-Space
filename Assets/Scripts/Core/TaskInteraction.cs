@@ -1,79 +1,149 @@
+using System.Collections;
 using UnityEngine;
 using TMPro;
 
 public class TaskInteraction : MonoBehaviour
 {
     public Material successMaterial;
+    public Material failureMaterial;
     public TaskPanel taskPanel;
     public GameObject[] environmentObjects;
-    //public GameObject audioObject;
     public GameObject proceedButton;
     public TextMeshProUGUI displayText;
     public TextMeshProUGUI interactionStatusText;
     public Rigidbody audioRb;
+    public GameObject AudioGameObject;
+    public AudioSource ambientAudioSource;
 
     private Vector3 _soundPosition;
     private TrackingSwitcher _trackingSwitcher;
     private SaberManager _saberManager;
 
-    // Flag to ensure OnSuccess runs only once per task completion
+    private string _sceneName;
     private bool _isTaskCompleted;
 
-    private void Awake()
-    {
-        if (CoreManager.Instance.currentTask == 1)
-        {
-            _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
-            _saberManager = FindFirstObjectByType<SaberManager>();
-        }
+    private float _timeLimit;
+    private float _localStartTime;
+    private bool _isTimerRunning = false;
 
+    private void Start()
+    {
         _isTaskCompleted = false;
+        _isTimerRunning = false;
+        int currentTask = CoreManager.Instance != null ? CoreManager.Instance.currentTask : 1;
+        
+        if (currentTask == 3) _timeLimit = 600f; 
+        else _timeLimit = 300f;
+        Debug.Log($"[TaskInteraction] Timer started. Limit: {_timeLimit} seconds.");
+    }
+    
+    void Update()
+    {
+        if (!_isTimerRunning || _isTaskCompleted) return;
+
+        float elapsed = Time.time - _localStartTime;
+        if (elapsed >= _timeLimit)
+        {
+            OnFailure();
+        }
+    }
+    
+    public void OnFailure()
+    {
+        if (_isTaskCompleted) return;
+        _isTaskCompleted = true;
+        _isTimerRunning = false;
+
+        Debug.Log("[TaskInteraction] Time limit reached! Task Failed.");
+        
+        SetMeshMaterial(failureMaterial);
+        
+        CoreManager manager = CoreManager.Instance;
+        if (manager != null)
+        {
+            manager.StopAndLogCurrentTaskTime(false); // false = Failed
+        }
+        
+        CleanUpAndShowPanel(false); 
     }
 
+    public void ActivateTaskTimer()
+    {
+        _localStartTime = Time.time;
+        _isTimerRunning = true;
+    }
+    
     // ReSharper disable Unity.PerformanceAnalysis
     public void OnSuccess()
     {
-        // Guard clause
         if (_isTaskCompleted) return;
-
-        Debug.Log("HIT HIT HIT!");
-
-        if (CoreManager.Instance)
-        {
-            CoreManager.Instance.StopAndLogCurrentTaskTime();
-        }
-
         _isTaskCompleted = true;
-
-
-        // Stop sound
-        if (taskPanel && SoundManager.Instance && !taskPanel.panelToHide.activeSelf)
+        _isTimerRunning = false;
+        
+        SetMeshMaterial(successMaterial);
+        CoreManager manager = CoreManager.Instance;
+        if (manager != null)
         {
-            SoundManager.Instance.StopSound();
+            manager.StopAndLogCurrentTaskTime(true);
         }
         
-        if (_saberManager) _saberManager.DisableSabers();
+        CleanUpAndShowPanel(true);
+    }
+
+    private void CleanUpAndShowPanel(bool isSuccess)
+    {
+        CoreManager manager = CoreManager.Instance;
+        SoundManager soundManager = SoundManager.Instance;
         
+        // Stop sound
+        if (taskPanel!= null && soundManager != null && !taskPanel.panelToHide.activeSelf)
+        {
+            soundManager.StopSound();
+        }
+        
+        if (manager.currentTask == 1)
+        {
+            _saberManager = FindFirstObjectByType<SaberManager>();
+            if (_saberManager != null) 
+            {
+                _saberManager.DisableSabers();
+            }
+        }
+        
+        if (manager.currentTask == 3 && ambientAudioSource != null)
+            ambientAudioSource.Stop();
+        
+        _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+        if (_trackingSwitcher != null)
+        {
+            _trackingSwitcher.SwitchToBoth();
+        }
+            
+        StartCoroutine(ShowPanelAfterDelay(isSuccess));
+    }
+    
+    
+    private IEnumerator ShowPanelAfterDelay(bool isSuccess)
+    {
+        yield return new WaitForSeconds(2.0f);
 
-        // Show the panel again
-        if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher)
-            _trackingSwitcher.SwitchToHandsOnly();
+        if (AudioGameObject != null)
+        {
+            AudioGameObject.SetActive(false);
+        }
 
-        if (taskPanel && !taskPanel.panelToHide.activeSelf)
+        if (taskPanel != null && !taskPanel.panelToHide.activeSelf)
         {
             taskPanel.ShowPanel();
 
-            if (proceedButton)
-            {
-                proceedButton.SetActive(true);
-            }
-
-            if (displayText)
+            if (proceedButton != null) proceedButton.SetActive(true);
+            if (displayText != null)
             {
                 displayText.gameObject.SetActive(true);
 
-                var currentCondition = CoreManager.Instance.currentCondition;
-                var currentTask = CoreManager.Instance.currentTask;
+                var manager = CoreManager.Instance; 
+                var currentCondition = manager.currentCondition;
+                var currentTask = manager.currentTask;
 
                 var taskType = currentTask switch
                 {
@@ -90,38 +160,37 @@ public class TaskInteraction : MonoBehaviour
                     _ => "Unknown Cue"
                 };
 
+                // Update text based on success or failure
+                string statusMsg = isSuccess ? "Task Completed! You may proceed." : "Time Limit Reached. You may proceed.";
+                
                 displayText.text = $"TASK {currentTask}: {taskType} ({cueType})";
-                interactionStatusText.text = "Status: Task Completed! You may proceed.";
+                interactionStatusText.text = $"Status: {statusMsg}";
                 interactionStatusText.gameObject.SetActive(true);
             }
-
         }
-
-        if (CoreManager.Instance.currentTask == 1)
-            _trackingSwitcher.SwitchToHandsOnly();
     }
-
-    public void revertAudioPosition()
-    {
-        if (audioRb != null)
-        {
-            audioRb.MovePosition(SoundManager.Instance._soundPosition);
-            Debug.Log("Moved sound source to: " + _soundPosition);
-        }
-
-    }
+    
+    
+    
 
     // ReSharper disable Unity.PerformanceAnalysis
     public void SetMeshMaterial(Material newMaterial)
     {
+        // First, check if the array itself is null
+        if (environmentObjects == null) return;
+
         foreach (GameObject envObject in environmentObjects)
         {
-            Renderer renderer = envObject.GetComponent<Renderer>();
-            if (renderer != null)
+            // Add this check!
+            if (envObject != null)
             {
-                renderer.material = newMaterial;
+                Renderer renderer = envObject.GetComponent<Renderer>();
+                if (renderer != null)
+                {
+                    renderer.material = newMaterial;
+                }
             }
         }
     }
-
 }
+

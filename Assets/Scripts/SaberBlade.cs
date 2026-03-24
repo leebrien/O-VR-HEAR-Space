@@ -1,53 +1,66 @@
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class SaberBlade : MonoBehaviour
 {
     public string targetTag = "CueSource";
     public Material greenMaterial;
-    public Material transparentMaterial;
     public OVRInput.Controller controller; // Left or Right controller
-    public TaskInteraction taskInteraction; // Must have OnSuccess() and SetMeshMaterial(Material)
+    private TaskInteraction _taskInteraction; // Must have OnSuccess() and SetMeshMaterial(Material)
+    private PracticeSoundManager _practiceSoundManager;
     public LayerMask targetLayer;
 
     private bool _isColliding = false;
+    
+    private void OnEnable()
+        {
+            // Reset the collision state to ensure we start fresh in each new scene.
+            _isColliding = false;
+            //Debug.Log("[SaberBlade] OnEnable: Collision state has been reset.");
+        }
+    
 
-    void Start()
+    public void UpdateSceneReferences(PracticeSoundManager practiceSoundManager, TaskInteraction taskInteraction)
     {
-        Debug.Log("[SaberBlade] Script initialized on " + gameObject.name + " with controller: " + controller);
+        //Debug.Log("UpdateSceneReferences on " + SceneManager.GetActiveScene().name + " with practiceSoundManager: " 
+                  //+ practiceSoundManager + " and taskInteraction: " + taskInteraction);
+        _practiceSoundManager = practiceSoundManager;
+        _taskInteraction = taskInteraction;
+        
     }
 
-    void Update()
+    private void Update()
     {
         bool isTriggerPressed = OVRInput.Get(OVRInput.Axis1D.PrimaryIndexTrigger, controller) > 0.1f;
-
-        // Debug trigger input state
-        if (isTriggerPressed)
-            Debug.Log("[SaberBlade] Trigger pressed on " + controller);
         
+        //if (isTriggerPressed)
+        //{
+         //   Debug.Log("SaberBlade triggered");
+        //}
 
         // ONE-SHOT logic
-        if (_isColliding && isTriggerPressed )
+        if (_isColliding && isTriggerPressed)
         {
-            Debug.Log("[SaberBlade] SUCCESS: Trigger pulled while colliding with target!");
-            if (taskInteraction)
+            //Debug.Log("Successful Trigger");
+            //Debug.Log("TaskInteraction is " + (_taskInteraction != null ? "notnull" : "null"));
+            //Debug.Log("PracticeSoundManager is " + (_practiceSoundManager != null ? "notnull" : "null"));
+            if (_taskInteraction != null)
             {
-                taskInteraction.OnSuccess();
-                taskInteraction.SetMeshMaterial(greenMaterial);
-            }
-            else
+                _taskInteraction.OnSuccess();
+            } else if (_practiceSoundManager != null)
             {
-                Debug.LogWarning("[SaberBlade] taskInteraction not assigned!");
+                _practiceSoundManager.OnSuccess(greenMaterial);
             }
         }
-        
     }
+    
 
     private void OnTriggerEnter(Collider other)
     {
         if (((1 << other.gameObject.layer) & targetLayer) != 0 && other.CompareTag(targetTag))
         {
             _isColliding = true;
-            Debug.Log("[SaberBlade] OnTriggerEnter with " + other.name);
+            //Debug.Log("[SaberBlade] OnTriggerEnter with " + other.name);
         }
     }
 
@@ -56,7 +69,7 @@ public class SaberBlade : MonoBehaviour
         if (((1 << other.gameObject.layer) & targetLayer) != 0 && other.CompareTag(targetTag))
         {
             _isColliding = false;
-            Debug.Log("[SaberBlade] OnTriggerExit with " + other.name);
+            //Debug.Log("[SaberBlade] OnTriggerExit with " + other.name);
         }
     }
 }

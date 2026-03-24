@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class BoundaryManager : MonoBehaviour
 {
-    public Transform playerTransform;
+    private Transform _playerTransform;
     public Renderer[] wallRenderers;
     public Collider[] wallColliders;
 
@@ -13,6 +13,7 @@ public class BoundaryManager : MonoBehaviour
 
     void Start()
     {
+        _playerTransform = CoreManager.Instance.GetCenterEyeAnchor();
         _initialColors = new Color[wallRenderers.Length];
         for (int i = 0; i < wallRenderers.Length; i++)
         {
@@ -22,20 +23,19 @@ public class BoundaryManager : MonoBehaviour
 
     void Update()
     {
-        if (playerTransform == null) return;
+        if (!_playerTransform) return;
         if (wallRenderers.Length != wallColliders.Length)
         {
-            Debug.LogError("Wall Renderers and Wall Colliders arrays must be the same size!");
             return;
         }
 
         for (int i = 0; i < wallRenderers.Length; i++)
         {
             // Calculate the closest point on the collider to the player
-            Vector3 closestPoint = wallColliders[i].ClosestPoint(playerTransform.position);
+            Vector3 closestPoint = wallColliders[i].ClosestPoint(_playerTransform.position);
 
             // Calculate the distance from the player to that closest point
-            float distance = Vector3.Distance(playerTransform.position, closestPoint);
+            float distance = Vector3.Distance(_playerTransform.position, closestPoint);
 
             float colorFactor = Mathf.Clamp01(distance / fadeDistance);
 

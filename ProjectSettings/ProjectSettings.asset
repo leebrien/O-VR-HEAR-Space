@@ -146,6 +146,10 @@ PlayerSettings:
   preloadedAssets:
   - {fileID: 11400000, guid: 26c55f5df6bd444a382e54ac308fec25, type: 2}
   - {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
+  - {fileID: 2444911968834405129, guid: b83edebb18cd043488f8351bb0d8db51, type: 3}
+  - {fileID: 102900000, guid: 12bd94900c7fc4846a721d9d4f23a767, type: 3}
+  - {fileID: 102900000, guid: 8f9f4c98fd4df44b19b4159d7dbc2a91, type: 3}
+  - {fileID: 102900000, guid: 25a358059c08341a6bcac3444d8d3934, type: 3}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -189,7 +193,7 @@ PlayerSettings:
   CreateWallpaper: 0
   androidSplitApplicationBinary: 0
   keepLoadedShadersAlive: 0
-  StripUnusedMeshComponents: 0
+  StripUnusedMeshComponents: 1
   strictShaderVariantMatching: 0
   VertexChannelCompressionMask: 4054
   iPhoneSdkVersion: 988
@@ -537,7 +541,7 @@ PlayerSettings:
   - m_BuildTarget: MacStandaloneSupport
     m_GraphicsJobMode: 1
   - m_BuildTarget: AndroidPlayer
-    m_GraphicsJobMode: 1
+    m_GraphicsJobMode: 0
   m_BuildTargetGraphicsAPIs:
   - m_BuildTarget: iOSSupport
     m_APIs: 10000000
@@ -565,13 +569,13 @@ PlayerSettings:
   m_BuildTargetGroupLightmapEncodingQuality:
   - serializedVersion: 2
     m_BuildTarget: Android
-    m_EncodingQuality: 1
+    m_EncodingQuality: 0
   m_BuildTargetGroupHDRCubemapEncodingQuality: []
   m_BuildTargetGroupLightmapSettings: []
   m_BuildTargetGroupLoadStoreDebugModeSettings: []
   m_BuildTargetNormalMapEncoding:
   - m_BuildTarget: Android
-    m_Encoding: 1
+    m_Encoding: 0
   m_BuildTargetDefaultTextureCompressionFormat:
   - serializedVersion: 3
     m_BuildTarget: Android
@@ -843,7 +847,7 @@ PlayerSettings:
   webEnableSubmoduleStrippingCompatibility: 0
   scriptingDefineSymbols:
     Android: ISDK_OPENXR_HAND;USE_INPUT_SYSTEM_POSE_CONTROL;USE_STICK_CONTROL_THUMBSTICKS;Oculus;APP_UI_EDITOR_ONLY
-    Standalone: ISDK_OPENXR_HAND;USE_INPUT_SYSTEM_POSE_CONTROL;USE_STICK_CONTROL_THUMBSTICKS
+    Standalone: ISDK_OPENXR_HAND;USE_INPUT_SYSTEM_POSE_CONTROL;USE_STICK_CONTROL_THUMBSTICKS;APP_UI_EDITOR_ONLY
     Windows Store Apps: USE_INPUT_SYSTEM_POSE_CONTROL;USE_STICK_CONTROL_THUMBSTICKS
   additionalCompilerArguments: {}
   platformArchitecture: {}

@@ -1,6 +1,6 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
+using System.Globalization;
 using TMPro;
 
 public class TaskPanel : MonoBehaviour
@@ -12,27 +12,25 @@ public class TaskPanel : MonoBehaviour
     public GameObject panelTextsHolder;
     public TextMeshProUGUI interactionStatusText;
     public GameObject panelToHide;
+    
+    public AudioSource ambientAudioSource;
 
     private const float TimerDuration = 5f;
     private TrackingSwitcher _trackingSwitcher;
     private SaberManager _saberManager;
+    
+    private int _currentTask = 0;
 
-    private void Awake()
+    private void Start()
     {
-       
+
         string currentCondition = CoreManager.Instance.currentCondition;
-        int currentTask = CoreManager.Instance.currentTask;
-        if (interactionStatusText) interactionStatusText.gameObject.SetActive(false);
-        if (currentTask == 1)
-        {
-            _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
-            _saberManager = FindFirstObjectByType<SaberManager>();
-           
-        }
-        
+         _currentTask = CoreManager.Instance.currentTask;
+        if (interactionStatusText != null) interactionStatusText.gameObject.SetActive(false);
+
         if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name.Contains("Task"))
         {
-            var taskType = currentTask switch
+            var taskType = _currentTask switch
             {
                 1 => "Pointing",
                 2 => "Grabbing",
@@ -44,14 +42,12 @@ public class TaskPanel : MonoBehaviour
             {
                 "PC" => "Personalized Cue",
                 "GC" => "Generic Cue",
-                _  => "Unknown Cue"
+                _ => "Unknown Cue"
             };
-                
-            displayText.text = $"TASK {currentTask}: {taskType} ({cueType})";
 
-            
+            displayText.text = $"TASK {_currentTask}: {taskType} ({cueType})";
         }
-        panelTextsHolder.SetActive(true);
+        if (panelTextsHolder != null) panelTextsHolder.SetActive(true);
     }
 
     public void OnStartButtonClicked()
@@ -86,7 +82,7 @@ public class TaskPanel : MonoBehaviour
     {
         float currentTime = TimerDuration;
 
-        if (counterTextHolder)
+        if (counterTextHolder!=null)
         {
             counterTitleHolder.gameObject.SetActive(true);
             displayText.gameObject.SetActive(false);
@@ -94,33 +90,60 @@ public class TaskPanel : MonoBehaviour
 
         while (currentTime > 0)
         {
-            counterTextHolder.text = Mathf.Ceil(currentTime).ToString();
+            counterTextHolder.text = Mathf.Ceil(currentTime).ToString(CultureInfo.InvariantCulture);
             yield return new WaitForSeconds(1f);
             currentTime--;
         }
 
         counterTextHolder.text = "0";
-        if (CoreManager.Instance.currentTask == 1 && _trackingSwitcher != null)
+        
+        if (CoreManager.Instance.currentTask == 1)
         {
-            _trackingSwitcher.SwitchToControllersOnly();
-            _saberManager.EnableSabers();
-            
+            _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+            _saberManager = FindFirstObjectByType<SaberManager>();
+
+            if (_trackingSwitcher != null && _saberManager != null)
+            {
+                _trackingSwitcher.SwitchToControllersOnly();
+                _saberManager.EnableSabers();
+            }
         }
+        else
+        {
+            _trackingSwitcher = FindFirstObjectByType<TrackingSwitcher>();
+            if (_trackingSwitcher != null) _trackingSwitcher.SwitchToHandsOnly();
+        }
+
+        if (_currentTask == 3)
+        {
+            ambientAudioSource.Play();
+        }
+        
         yield return new WaitForSeconds(1f);
 
-        if (displayText)
+        if (displayText!=null)
         {
             counterTitleHolder.gameObject.SetActive(false);
             counterTextHolder.gameObject.SetActive(false);
         }
-        if (panelToHide)
+        if (panelToHide!=null)
         {
             panelToHide.SetActive(false);
 
-            if (SoundManager.Instance )
+            if (SoundManager.Instance)
             {
                 SoundManager.Instance.PlaySound();
                 CoreManager.Instance.StartCurrentTaskTime();
+            }
+            
+            TaskInteraction taskInteraction = FindFirstObjectByType<TaskInteraction>();
+            if (taskInteraction != null)
+            {
+                taskInteraction.ActivateTaskTimer();
+            }
+            else
+            {
+                Debug.Log("No task interaction found");
             }
         }
     }

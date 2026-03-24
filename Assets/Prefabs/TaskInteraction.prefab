@@ -45,7 +45,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   successMaterial: {fileID: 2100000, guid: f247ca0bb526b484b9b886d41b65e9ae, type: 2}
-  environmentObjects: []
+  failureMaterial: {fileID: 2100000, guid: aa067a242cc9f4fedb4d46391b832b8c, type: 2}
   taskPanel: {fileID: 0}
+  environmentObjects: []
   proceedButton: {fileID: 0}
   displayText: {fileID: 0}
+  interactionStatusText: {fileID: 0}
+  audioRb: {fileID: 0}
+  AudioGameObject: {fileID: 0}
+  ambientAudioSource: {fileID: 0}

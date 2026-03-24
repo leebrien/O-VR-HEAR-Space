@@ -1,11 +1,12 @@
 using System;
 using System.Collections;
+using Unity.Multiplayer.Center.Common;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class PracticeSoundManager : MonoBehaviour
 {
-    public Transform user; // Assign to center eye anchor
+    private Transform _user; // Assign to center eye anchor
 
     public GameObject pointingObject; // Object for pointing
     public GameObject grabbingObject; // Object for grabbing
@@ -18,16 +19,28 @@ public class PracticeSoundManager : MonoBehaviour
     public TrackingSwitcher trackingSwitcher;
     
     private int recentTaskType = 0;
+    private Renderer _pointingRenderer;
+    private Renderer _grabbingRenderer;
+    private bool _firstLog;
 
     public void Start()
     {
-        trackingSwitcher.SwitchToHandsOnly();
+        _firstLog = CoreManager.Instance.GetFirstLog();
+        if (pointingObject!=null) _pointingRenderer = pointingObject.GetComponent<Renderer>();
+        if (grabbingObject!=null) _grabbingRenderer = grabbingObject.GetComponent<Renderer>();
+        _user = CoreManager.Instance.GetCenterEyeAnchor();
+    }
+
+    public TrackingSwitcher GetTrackingSwitcher()
+    {
+        return trackingSwitcher ?? null;
     }
 
     public void PlayObject(int taskType)
     {
-        pointingObject?.SetActive(false);
-        grabbingObject?.SetActive(false);
+        if (pointingObject != null) pointingObject.SetActive(false);
+
+        if (grabbingObject != null) grabbingObject.SetActive(false);
 
         GameObject activeObject;
         if (taskType == 1)
@@ -48,13 +61,13 @@ public class PracticeSoundManager : MonoBehaviour
             return;
         }
 
-        if (user == null || activeObject == null)
+        if (_user == null || activeObject == null)
         {
             Debug.LogWarning("Required components not assigned in the Inspector.");
             return;
         }
 
-        Vector3 objectPosition = user.position;
+        Vector3 objectPosition = _user.position;
         GenerateObjectPosition(ref objectPosition, taskType);
 
         activeObject.transform.position = objectPosition;
@@ -67,17 +80,24 @@ public class PracticeSoundManager : MonoBehaviour
         grabbingObject?.SetActive(false);
     }
 
+    public bool GetLoggingStatus()
+    {
+        return _firstLog;
+    }
+
     private void GenerateObjectPosition(ref Vector3 objectPos, int taskType)
     {
         if (taskType == 1)
         {
-            objectPos.z += 3.5f;
+            objectPos.z += 2.5f;
             objectPos.x += Random.Range(-3.75f, 3.75f);
         }
         else if (taskType == 2 || taskType == 3)
         {
             int direction = Random.Range(0, 8);
-            float offset = Random.Range(1.75f, 3.75f);
+           // float offset = Random.Range(1.75f, 3.75f);
+            float[] allowedoffsets = { 0.75f, 1f, 1.25f };
+            float offset = allowedoffsets[Random.Range(0, allowedoffsets.Length)];
 
             switch (direction)
             {
@@ -92,23 +112,21 @@ public class PracticeSoundManager : MonoBehaviour
             }
         }
 
-        objectPos.y = Random.Range(1, user.position.y + 0.3f);
+        objectPos.y = Random.Range(1, _user.position.y + 0.3f);
         objectPos.x = Mathf.Clamp(objectPos.x, -_roomSize.x / 2, _roomSize.x / 2);
         objectPos.z = Mathf.Clamp(objectPos.z, -_roomSize.z / 2, _roomSize.z / 2);
     }
 
     public void OnSuccess(Material material)
     {
-        Debug.Log("HIT HIT HIT!");
-
-        StartCoroutine(CompleteTaskAfterDelay(2f));
+        
+        SetMeshMaterial(material);
         if (recentTaskType == 1)
         {
             saberManager.DisableSabers();
             trackingSwitcher.SwitchToHandsOnly();
         }
-        
-        SetMeshMaterial(material);
+        StartCoroutine(CompleteTaskAfterDelay(2f));
     }
 
     // delay before compeletion
@@ -124,16 +142,12 @@ public class PracticeSoundManager : MonoBehaviour
 
     public void SetMeshMaterial(Material material)
     {
-        GameObject activeObject = pointingObject.activeSelf ? pointingObject : (grabbingObject.activeSelf ? grabbingObject : null);
+        Renderer activeRenderer = pointingObject.activeSelf ? _pointingRenderer :
+            (grabbingObject.activeSelf ? _grabbingRenderer : null);
 
-        if (activeObject != null)
+        if (activeRenderer)
         {
-            // change material to green
-            Renderer objectRenderer = activeObject.GetComponent<Renderer>();
-            if (objectRenderer != null)
-            {
-                objectRenderer.material = material;
-            }
+            activeRenderer.material = material;
         }
     }
     

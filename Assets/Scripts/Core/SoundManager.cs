@@ -1,22 +1,22 @@
-using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using Oculus.Interaction;
-using TMPro;
 using Random = UnityEngine.Random;
 
 public class SoundManager : MonoBehaviour
 {
     public static SoundManager Instance;
-    public Transform user; //User reference, eye anchor center
-    public GameObject audioObject; // Direct reference to the object in the hierarchy
+    private Transform _user; 
     public AudioClip genericCue;
     public AudioClip hearsonaCue;
     private readonly Vector3 _roomSize = new Vector3(8.0f, 2.5f, 8.0f);
 
-    private AudioSource _audioSource;
+    private AudioSource _currentSceneAudioSource;
+    
+    //private AudioSource _audioSource;
     public Vector3 _soundPosition;
+    
+    private Coroutine _playCoroutine;
 
     private void Awake()
     {
@@ -25,7 +25,7 @@ public class SoundManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            SceneManager.sceneLoaded += OnSceneLoaded;
+            //SceneManager.sceneLoaded += OnSceneLoaded;
         }
         else
         {
@@ -35,40 +35,63 @@ public class SoundManager : MonoBehaviour
 
     private void OnDestroy()
     {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
+        //SceneManager.sceneLoaded -= OnSceneLoaded;
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
-        user = GameObject.FindGameObjectWithTag("MainCamera")?.transform;
-        audioObject = GameObject.FindGameObjectWithTag("CueSource");
+        if (CoreManager.Instance == null)
+        {
+            Debug.LogError("CoreManager.Instance is null. Cannot initialize SoundManager.");
+            return;
+        }
         
-        if (audioObject != null) 
-            _audioSource = audioObject.GetComponent<AudioSource>();
-        
-        if (_audioSource == null)
-            Debug.LogWarning("No AudioSource found in scene: " + scene.name);
+        _user = CoreManager.Instance.GetCenterEyeAnchor();
+    }
+    
+    public void RegisterSceneAudioSource(AudioSource source)
+    {
+        _currentSceneAudioSource = source;
+    }
+
+    public void UnregisterSceneAudioSource()
+    {
+        _currentSceneAudioSource = null;
     }
 
     public void PlaySound()
     {
-        if (user == null || genericCue == null || audioObject == null || hearsonaCue == null)
+        
+        if (_user == null && CoreManager.Instance != null)
         {
-            Debug.LogWarning("User, soundClip, or audioObject not assigned!");
+            _user = CoreManager.Instance.GetCenterEyeAnchor();
+        }
+
+        // Use the new _currentSceneAudioSource reference
+        if (_user == null || genericCue == null || _currentSceneAudioSource == null || hearsonaCue == null)
+        {
+            Debug.LogWarning("SoundManager is missing references! User, Clip, or SceneAudioSource is null.");
             return;
         }
 
-        if (_audioSource != null)
+        if (_currentSceneAudioSource != null)
         {
-            _audioSource.Stop();
+            _currentSceneAudioSource.Stop();
         }
 
-        _soundPosition = user.position;
+        _soundPosition = _user.position;
         GenerateSoundPosition(ref _soundPosition);
 
-        // Position the existing audio object
-        audioObject.transform.position = _soundPosition;
-        audioObject.SetActive(true);
+       
+        _currentSceneAudioSource.transform.position = _soundPosition;
+        _currentSceneAudioSource.gameObject.SetActive(true);
+        
+        
+        if (CoreManager.Instance == null)
+        {
+            Debug.LogWarning("CoreManager.Instance is null. Cannot determine condition.");
+            return;
+        }
 
         string currentCondition = CoreManager.Instance.currentCondition;
         Debug.Log("Current Condition is: " + currentCondition);
@@ -90,35 +113,51 @@ public class SoundManager : MonoBehaviour
 
     public void StopSound()
     {
-        if (_audioSource != null)
+        if (_currentSceneAudioSource != null)
         {
-            _audioSource.Stop();
-            _audioSource.enabled = false;
+            _currentSceneAudioSource.Stop();
+            _currentSceneAudioSource.enabled = false;
         }
-        //audioObject.SetActive(false);
+        
+        if (_playCoroutine != null)
+        {
+            StopCoroutine(_playCoroutine);
+            _playCoroutine = null;
+        }
     }
 
     private void InitializeSoundSource(AudioClip clip)
     {
-        _audioSource.clip = clip;
-        _audioSource.spatialBlend = 1.0f;
-        _audioSource.playOnAwake = false;
-        _audioSource.loop = false;
+        if (_playCoroutine != null)
+        {
+            StopCoroutine(_playCoroutine);
+        }
+        
+        _currentSceneAudioSource.clip = clip;
+        _currentSceneAudioSource.spatialBlend = 1.0f;
+        _currentSceneAudioSource.playOnAwake = false;
+        _currentSceneAudioSource.loop = false;
 
-        StartCoroutine(PlayWithDelay(1.5f));
+        _playCoroutine = StartCoroutine(PlayWithDelay(1.5f));
     }
 
     private IEnumerator PlayWithDelay(float delay)
     {
         while (true)
         {
-            _audioSource.Play();
-            yield return new WaitForSeconds(_audioSource.clip.length + delay);
+            _currentSceneAudioSource.Play();
+            yield return new WaitForSeconds(_currentSceneAudioSource.clip.length + delay);
         }
     }
 
     private void GenerateSoundPosition(ref Vector3 soundPos)
     {
+        if (CoreManager.Instance == null)
+        {
+            Debug.LogWarning("CoreManager.Instance is null. Cannot get current task.");
+            return; 
+        }
+        
         int currentTask = CoreManager.Instance.currentTask;
         Debug.Log("Current Task is: " + currentTask);
         DirectionGeneratorPerTask(ref soundPos, currentTask);
@@ -134,9 +173,10 @@ public class SoundManager : MonoBehaviour
         else if (taskType == 2 || taskType == 3)
         {
             int direction = Random.Range(0, 8);
-           // float offset = Random.Range(1.75f, 3.75f);
-            float[] allowedoffsets = { 0.75f, 1f, 1.25f };
-            float offset = allowedoffsets[Random.Range(0, allowedoffsets.Length)];
+            float offset = Random.Range(1.75f, 3.25f);
+            //For testing offsets to allow searching in small spaces
+            //float[] allowedoffsets = { 0.75f, 1f, 1.25f };
+            //float offset = allowedoffsets[Random.Range(0, allowedoffsets.Length)];
 
             switch (direction)
             {
@@ -150,7 +190,7 @@ public class SoundManager : MonoBehaviour
                 case 7: soundPos.z -= offset; soundPos.x -= offset; break;
             }
         }
-        soundPos.y = Random.Range(1, user.position.y + 0.3f);
+        soundPos.y = Random.Range(1, _user.position.y + 0.3f);
         soundPos.x = Mathf.Clamp(soundPos.x, -_roomSize.x / 2, _roomSize.x / 2);
         soundPos.z = Mathf.Clamp(soundPos.z, -_roomSize.z / 2, _roomSize.z / 2);
     }
