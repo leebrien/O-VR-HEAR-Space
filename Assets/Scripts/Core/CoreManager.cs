@@ -48,8 +48,9 @@ public class CoreManager : MonoBehaviour
     public GameObject GetRightSaber() => _rightSaber;
     public Transform GetCenterEyeAnchor() => _centerEyeAnchor;
     public string GetSessionParticipantID() => _sessionParticipantID;
-    
 
+    private int _ssqCount;
+    
 
     private PracticeSoundManager _soundManager;
     private TaskInteraction _taskInteraction;
@@ -178,10 +179,12 @@ public class CoreManager : MonoBehaviour
 
         for (int i = 0; i < rawTasks.Length; i++)
         {
+            protocolSequence.Add("SSQ");
             protocolSequence.Add(rawTasks[i]);
             protocolSequence.Add("Questionnaire");
             if (i == 2) protocolSequence.Add("Break");
         }
+        protocolSequence.Add("End");
         _sceneOrder = protocolSequence.ToArray();
         _currentIndex = 0;
         print( " Protocol Order"  + " " + _sceneOrder);
@@ -397,6 +400,15 @@ public class CoreManager : MonoBehaviour
 
         return $"P{nextParticipantNumber:D3}";
     }
+
+    public int getSSQCount()
+    {
+        return _ssqCount;
+    }    
     
+    public void incrementSSQCount()
+    {
+        _ssqCount++;
+    }
 
 }

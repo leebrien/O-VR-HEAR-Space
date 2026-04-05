@@ -35,6 +35,9 @@ EditorBuildSettings:
   - enabled: 0
     path: Assets/Scenes/SSQ-Scene.unity
     guid: a8676ca0c21b144119d5ac5615268240
+  - enabled: 1
+    path: Assets/Scenes/SSQ.unity
+    guid: e2cc6ebb80e454e2fafdb315b429ae92
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 6fab538e4e25c452f996f6ed470284af, type: 2}
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f, type: 2}

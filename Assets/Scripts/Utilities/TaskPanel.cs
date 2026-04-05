@@ -146,5 +146,8 @@ public class TaskPanel : MonoBehaviour
                 Debug.Log("No task interaction found");
             }
         }
+        //DEBUG CODE - AUTO SUCCESS AFTER 10 SECONDS
+        //TaskInteraction taskInteractionInstance = FindFirstObjectByType<TaskInteraction>();
+        //taskInteractionInstance.OnSuccess();
     }
 }

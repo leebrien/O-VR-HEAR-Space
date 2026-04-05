@@ -35,6 +35,7 @@ public class TaskInteraction : MonoBehaviour
         if (currentTask == 3) _timeLimit = 600f; 
         else _timeLimit = 300f;
         Debug.Log($"[TaskInteraction] Timer started. Limit: {_timeLimit} seconds.");
+        
     }
     
     void Update()

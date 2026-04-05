@@ -1,0 +1,25 @@
+{
+  "questionnaireName": "Post-task Simulation Sickness Questionnaire",
+  "questions": [
+    {
+      "id": "SSQ_1",
+      "type": "multipleChoice",
+      "text": "General discomfort"
+    },
+    {
+      "id": "SSQ_2",
+      "type": "multipleChoice",
+      "text": "Dizziness"
+    },
+    {
+      "id": "SSQ_3",
+      "type": "multipleChoice",
+      "text": "Vertigo"
+    },
+    {
+      "id": "SSQ_4",
+      "type": "multipleChoice",
+      "text": "Difficulty focusing"
+    }
+  ]
+}

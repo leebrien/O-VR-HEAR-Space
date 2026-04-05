@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 
 public class QuestionnaireManager : MonoBehaviour
 {
@@ -17,9 +18,9 @@ public class QuestionnaireManager : MonoBehaviour
     private int _currentSceneIndex;
 
     // Flags to ensure Cue Preference runs only once per task pair trigger point
-    private bool _cuePreferenceDoneAfterIndex3; // Triggered when CoreManager index becomes 4
-    private bool _cuePreferenceDoneAfterIndex8; // Triggered when CoreManager index becomes 9
-    private bool _cuePreferenceDoneAfterIndex13; // Triggered when CoreManager index becomes 14
+    private bool _cuePreferenceDoneAfterIndex5; // Triggered when CoreManager index becomes 4
+    private bool _cuePreferenceDoneAfterIndex12; // Triggered when CoreManager index becomes 11
+    private bool _cuePreferenceDoneAfterIndex19; // Triggered when CoreManager index becomes 18
     
 
     void Start()
@@ -31,6 +32,7 @@ public class QuestionnaireManager : MonoBehaviour
             _currentCondition = CoreManager.Instance.GetCurrentCondition();
             _currentTask = CoreManager.Instance.GetCurrentTask();
             _currentSceneIndex = CoreManager.Instance.GetCurrentSceneIndex();
+            
             
             Debug.Log($"[QuestionnaireManager] Using Participant ID: {_sessionParticipantID}");
         }
@@ -86,20 +88,20 @@ public class QuestionnaireManager : MonoBehaviour
 
             // Determine if it's the RIGHT TIME to show cuePreference
             bool runCpNow = false;
-            if (coreManagerCurrentIndex == 4 && !_cuePreferenceDoneAfterIndex3)
+            if (coreManagerCurrentIndex == 6 && !_cuePreferenceDoneAfterIndex5)
             {
                 runCpNow = true;
-                _cuePreferenceDoneAfterIndex3 = true;
+                _cuePreferenceDoneAfterIndex5 = true;
             }
-            else if (coreManagerCurrentIndex == 9 && !_cuePreferenceDoneAfterIndex8)
+            else if (coreManagerCurrentIndex == 13 && !_cuePreferenceDoneAfterIndex12)
             {
                 runCpNow = true;
-                _cuePreferenceDoneAfterIndex8 = true;
+                _cuePreferenceDoneAfterIndex12 = true;
             }
-            else if (coreManagerCurrentIndex == 13 && !_cuePreferenceDoneAfterIndex13)
+            else if (coreManagerCurrentIndex == 19 && !_cuePreferenceDoneAfterIndex19)
             {
                 runCpNow = true;
-                _cuePreferenceDoneAfterIndex13 = true;
+                _cuePreferenceDoneAfterIndex19 = true;
             }
 
             if (runCpNow)
